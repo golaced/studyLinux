@@ -1,0 +1,26 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/lxg-/code/opencv/myofcode/xtofReadSonar.c
+stdio.h
+-
+string.h
+-
+xtofReadSonar.h
+/home/lxg-/code/opencv/myofcode/xtofReadSonar.h
+
+/home/lxg-/code/opencv/myofcode/xtofReadSonar.h
+sys/types.h
+-
+sys/stat.h
+-
+fcntl.h
+-
+termios.h
+-
+

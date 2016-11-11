@@ -1,0 +1,2 @@
+myapp: 123.c
+	cc -o myapp 123.c -lpthread

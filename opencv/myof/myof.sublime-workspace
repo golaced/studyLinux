@@ -1,0 +1,364 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"IMG",
+				"IMG_SELECT_AREA"
+			],
+			[
+				"g_camera",
+				"g_cameraShiftY"
+			],
+			[
+				"g_cameraS",
+				"g_cameraShiftX"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "xtofmavlinktest.cpp",
+			"settings":
+			{
+				"buffer_size": 7186,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "CMakeLists.txt",
+			"settings":
+			{
+				"buffer_size": 416,
+				"line_ending": "Unix"
+			}
+		}
+	],
+	"build_system": "Packages/Makefile/Make.sublime-build",
+	"build_system_choices":
+	[
+		[
+			[
+				[
+					"Packages/C++/C++ Single File.sublime-build",
+					""
+				],
+				[
+					"Packages/C++/C++ Single File.sublime-build",
+					"Run"
+				],
+				[
+					"Packages/Makefile/Make.sublime-build",
+					""
+				],
+				[
+					"Packages/Makefile/Make.sublime-build",
+					"Clean"
+				]
+			],
+			[
+				"Packages/Makefile/Make.sublime-build",
+				""
+			]
+		]
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 58.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"Package Control: ins",
+				"Package Control: Install Package"
+			],
+			[
+				"Package Control: insall",
+				"Package Control: Install Package"
+			],
+			[
+				"GBK",
+				"Package Control: Enable Package"
+			]
+		],
+		"width": 400.0
+	},
+	"console":
+	{
+		"height": 60.0,
+		"history":
+		[
+			"importurllib2,os; pf='Package Control.sublime-package'; ",
+			"import  urllib.request,os;pf='Package Control.sublime-package';ipp=sublime.installed_packages_path();urllib.request.install_opener(urllib.request.build_opener(urllib.request.ProxyHandler()));open(os.path.join(ipp,pf),'wb').write(urllib.request.urlopen('http://sublime.wbond.net/'+pf.replace(' ','%20')).read())",
+			"mport  urllib.request,os;pf='Package Control.sublime-package';ipp=sublime.installed_packages_path();urllib.request.install_opener(urllib.request.build_opener(urllib.request.ProxyHandler()));open(os.path.join(ipp,pf),'wb').write(urllib.request.urlopen('http://sublime.wbond.net/'+pf.replace(' ','%20')).read())"
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"expanded_folders":
+	[
+		"/home/lxg-/code/opencv/myof",
+		"/home/lxg-/code/opencv/myof/mavlink"
+	],
+	"file_history":
+	[
+		"/home/lxg-/code/opencv/myof/xtofglobal.h.dump",
+		"/home/lxg-/code/opencv/myof/MotionDetect.cpp.dump",
+		"/home/lxg-/code/opencv/myof/xtofglobal.h",
+		"/home/lxg-/code/opencv/myof/MotionDetect.cpp",
+		"/home/lxg-/code/opencv/myof/xtofmavlinktest.cpp",
+		"/home/lxg-/code/opencv/myof/mavlink/mavlink_types.h",
+		"/home/lxg-/code/opencv/myof/mavlink/common/mavlink_msg_data_transmission_handshake.h",
+		"/home/lxg-/code/opencv/myof/mavlink/common/mavlink_msg_encapsulated_data.h",
+		"/home/lxg-/code/opencv/myof/mavlink/common/common.h",
+		"/home/lxg-/code/opencv/myof/xtofmavlinktest.h",
+		"/home/lxg-/code/opencv/myof/mavlink/common/mavlink.h",
+		"/home/lxg-/code/opencv/myof/xtofReadSonar.c",
+		"/home/lxg-/code/opencv/myof/xtofReadSonar.h",
+		"/home/lxg-/code/opencv/myof/mavlink/common/mavlink_msg_heartbeat.h",
+		"/home/lxg-/code/opencv/myof/mavlink/common/mavlink_msg_optical_flow.h",
+		"/home/lxg-/code/opencv/myof/mavlink/mavlink_bridge.h",
+		"/home/lxg-/code/opencv/myof/CMakeLists.txt",
+		"/home/lxg-/code/opencv/myof/mavlink/mavlink_helpers.h",
+		"/home/lxg-/code/opencv/myof/xtofmavlinktest.c",
+		"/home/lxg-/code/opencv/myof/mavlink_bridge.h",
+		"/home/lxg-/code/opencv/myof/xtofmalinktest.c",
+		"/home/lxg-/code/opencv/myof/xtofAffine2D.cpp.dump",
+		"/home/lxg-/code/opencv/myof/xtofAffine2D.h.dump",
+		"/home/lxg-/code/opencv/myof/xtofFindCorner.cpp.dump",
+		"/home/lxg-/code/opencv/myof/CMakeCache.txt",
+		"/home/lxg-/code/opencv/myof/xtofFindCorner.cpp",
+		"/home/lxg-/code/opencv/myof/xtofCameraCorrect.cpp.dump",
+		"/home/lxg-/code/opencv/myof/xtofCameraCorrect.cpp",
+		"/home/lxg-/code/opencv/myof/xtofCameraHeight.cpp.dump",
+		"/home/lxg-/code/opencv/myof/xtofCalcPyrlk.h.dump",
+		"/home/lxg-/code/opencv/myof/xtofCalcPyrlk.cpp.dump",
+		"/home/lxg-/code/opencv/myof/xtofAffine2D.h",
+		"/home/lxg-/code/opencv/myof/xtofAffine2D.cpp",
+		"/home/lxg-/code/opencv/myof/xtofCalcPyrlk.h",
+		"/home/lxg-/code/opencv/myof/xtofCalcPyrlk.cpp",
+		"/home/lxg-/code/opencv/myof/xtofFindCorner.h",
+		"/home/lxg-/code/opencv/myof/xtofCameraHeight.cpp",
+		"/home/lxg-/code/opencv/optical/MotionDetect.cpp",
+		"/home/lxg-/code/opencv/myof/myof.sublime-project",
+		"/home/lxg-/.config/sublime-text-3/Packages/ConvertToUTF8/ConvertToUTF8.sublime-settings",
+		"/home/lxg-/code/opencv/myof/xtofCameraCorrect.h",
+		"/home/lxg-/code/opencv/optical/camerathread.cpp"
+	],
+	"find":
+	{
+		"height": 36.0
+	},
+	"find_in_files":
+	{
+		"height": 96.0,
+		"where_history":
+		[
+			""
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"MAVLINK_MSG_ENCAPSULATED_DATA_FIELD_DATA_LEN",
+			"MAVLINK_DATA_STREAM_IMG_RAW8U",
+			"mavlink_msg_data_transmission_handshake_send(",
+			"mavlink_msg_data_transmission_handshake_send",
+			"mavlink_system",
+			"mavlink_system_t",
+			"_mavlink_send_uart",
+			"optical",
+			"mavlink_channel_t",
+			"mavlink_channel_t ",
+			"comm_send_ch",
+			"_mavlink_send_uart",
+			"mavlink_msg_optical_flow_rad_send",
+			"confidence",
+			"MAV_TYPE_HELICOPTER",
+			"global_data",
+			"#"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 1,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "xtofmavlinktest.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 7186,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								6035,
+								6035
+							]
+						],
+						"settings":
+						{
+							"is_init_dirty_state": false,
+							"origin_encoding": "ASCII",
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 3420.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "CMakeLists.txt",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 416,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								416,
+								416
+							]
+						],
+						"settings":
+						{
+							"is_init_dirty_state": false,
+							"origin_encoding": "ASCII",
+							"syntax": "Packages/Text/Plain text.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 28.0
+	},
+	"input":
+	{
+		"height": 36.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.exec":
+	{
+		"height": 30.0
+	},
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"pinned_build_system": "",
+	"project": "myof.sublime-project",
+	"replace":
+	{
+		"height": 52.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 288.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}

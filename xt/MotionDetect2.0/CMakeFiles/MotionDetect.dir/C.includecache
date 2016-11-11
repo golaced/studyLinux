@@ -1,0 +1,30 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/projects/MotionDetect/PilotData.c
+stdio.h
+-
+stdlib.h
+-
+sys/types.h
+-
+sys/ipc.h
+-
+sys/msg.h
+-
+errno.h
+-
+sys/time.h
+-
+pthread.h
+-
+PilotData.h
+/home/projects/MotionDetect/PilotData.h
+
+/home/projects/MotionDetect/PilotData.h
+

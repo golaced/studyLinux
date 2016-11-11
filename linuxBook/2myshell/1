@@ -1,0 +1,13 @@
+# !bin/bas
+
+myvar="hi there"
+
+echo $myvar
+echo "$myvar"
+echo '$myvar'
+echo \$echo
+
+echo enter some txt to myvar
+read myvar
+echo '$myvar' now equals $myvar
+exit 0

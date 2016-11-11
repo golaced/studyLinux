@@ -1,0 +1,34 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/lxg-/code/opencv/usbuart/main.c
+readSonar.h
+/home/lxg-/code/opencv/usbuart/readSonar.h
+string.h
+-
+stdio.h
+-
+
+/home/lxg-/code/opencv/usbuart/readSonar.c
+stdio.h
+-
+string.h
+-
+readSonar.h
+/home/lxg-/code/opencv/usbuart/readSonar.h
+
+/home/lxg-/code/opencv/usbuart/readSonar.h
+sys/types.h
+-
+sys/stat.h
+-
+fcntl.h
+-
+termios.h
+-
+

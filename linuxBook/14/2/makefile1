@@ -1,0 +1,2 @@
+myapp1: shm1.c
+	cc -o myapp1 shm1.c

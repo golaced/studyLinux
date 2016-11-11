@@ -1,0 +1,3 @@
+/home/lxg-/code/opencv/opencvtest/CMakeFiles/edit_cache.dir
+/home/lxg-/code/opencv/opencvtest/CMakeFiles/rebuild_cache.dir
+/home/lxg-/code/opencv/opencvtest/CMakeFiles/myapp.dir

@@ -1,0 +1,2 @@
+myapp: 124mutex.c
+	cc -o myapp 124mutex.c -lpthread

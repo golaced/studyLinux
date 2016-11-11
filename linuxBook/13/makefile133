@@ -1,0 +1,2 @@
+myapp: 133.c
+	cc -o myapp 133.c

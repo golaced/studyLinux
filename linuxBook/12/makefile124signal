@@ -1,0 +1,2 @@
+myapp: 124signal.c
+	cc -o myapp 124signal.c -lpthread

@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 2.8)
+project( myapp )
+find_package( OpenCV REQUIRED)
+set(SRC_LIST main.c readSonar.c)
+add_executable( myapp ${SRC_LIST} )
+target_link_libraries( myapp ${OpenCV_LIBS})

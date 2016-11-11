@@ -1,0 +1,80 @@
+#define SONAR_SCALE 1000
+static float sonar_values[3] = { 0.0f };
+static unsigned insert_index = 0;
+
+sonar_mode = insert_sonar_value_and_get_mode_value(valid_data / SONAR_SCALE); valid_data即新数据，这是第一次滤波
+float insert_sonar_value_and_get_mode_value(float insert)
+{
+        const unsigned sonar_count = sizeof(sonar_values) / sizeof(sonar_values[0]);
+
+        sonar_values[insert_index] = insert;
+        insert_index++;
+        if (insert_index == sonar_count) {
+                insert_index = 0;
+        }
+
+        /* sort and return mode */
+
+        /* copy ring buffer */
+        float sonar_temp[sonar_count];
+        memcpy(sonar_temp, sonar_values, sizeof(sonar_values));
+
+        sonar_bubble_sort(sonar_temp, sonar_count);
+
+        /* the center element represents the mode after sorting */
+        return sonar_temp[sonar_count / 2];
+}
+sonar_bubble_sort(sonar_temp, sonar_count);将三次数据冒泡法排序，取第中间的值，也就是个中位值。算法功底太次，感觉这个函数也就是取中位值，不过insert是插值的意思，线性插值神马的不明白，
+static void sonar_filter(void)  卡尔曼滤波
+{
+        /* no data for long time */
+        if (dt > 0.25f) // more than 2 values lost
+        {
+                v_pred = 0;
+        }
+
+
+        x_pred = x_post + dt * v_pred;
+        v_pred = v_post;
+
+
+        float x_new = sonar_mode;
+        sonar_raw = x_new;
+        x_post = x_pred + global_data.param[PARAM_SONAR_KALMAN_L1] * (x_new - x_pred);
+        v_post = v_pred + global_data.param[PARAM_SONAR_KALMAN_L2] * (x_new - x_pred);
+
+
+}
+
+卡尔曼看了多次，也没真正理解，PX4倒是写得很简单，下面是Air Nano四轴的对加速度卡尔曼滤波的程序，
+static double KalmanFilter_z(const double ResrcData,double ProcessNiose_Q,double MeasureNoise_R)
+{
+   double R = MeasureNoise_R;
+   double Q = ProcessNiose_Q;
+   static double z_last;
+   double z_mid = z_last;
+   double z_now;
+   static double p_last;
+   double p_mid ;
+   double p_now;
+   double kg;        
+
+
+   z_mid=z_last; //x_last=x(k-1|k-1),x_mid=x(k|k-1)
+   p_mid=p_last+Q; //
+   kg=p_mid/(p_mid+R); //
+   z_now=z_mid+kg*(ResrcData-z_mid);//
+                
+   p_now=(1-kg)*p_mid;//
+   p_last = p_now; //
+   z_last = z_now; //?
+   return z_now;                
+}
+
+楼楼仔细看了看，发现PX4没有Q:过程噪声  R:测量噪声，而是直接给卡尔曼增益赋值，从Air Nano的程序可以看出kg其实是根据Q、R以及估计的最优的协方差算得的，
+短短的几行程序其实有好多奇怪的地方
+1、v_post = v_pred + global_data.param[PARAM_SONAR_KALMAN_L2] * (x_new - x_pred);对速度也进行了估计，这是个很好的引导吧，楼主这水平自己码的话，想不到引进速度。
+2、x_post = x_pred + global_data.param[PARAM_SONAR_KALMAN_L1] * (x_new - x_pred);如果我把卡尔曼增益global_data.param[PARAM_SONAR_KALMAN_L1] 改成kp，大家想到什么了呢？？？   哈哈哈  我是不会告诉你PID的
+
+
+好了  继续干光流了！！！
