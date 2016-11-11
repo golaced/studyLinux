@@ -18,9 +18,6 @@ int main(int argc, char *argv[])
 }
 
 
-
-
-
 int uartRead(int fd, char *buf)
 {
     char str[256];

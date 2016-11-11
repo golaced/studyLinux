@@ -42,6 +42,6 @@ int nrfSend(float x, float y)
 {
     char buf[30] = {0};
 
-    sprintf(buf, "%f,%f", x, y);
+    sprintf(buf, "%2.3f,%2.3f\n", x, y);
     write(g_nrfFd, buf, strlen(buf));
 }
