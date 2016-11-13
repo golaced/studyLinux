@@ -8,10 +8,11 @@ int preprocessIm(Mat &srcIm);
 int readIm(Mat &im);
 int ranColor();
 int writeVideo();
+int showVideo();
 
 int main(int argc, char *argv[])
 {
-	int flg = 1;
+	int flg = 6;
 
 	if(argc > 1)
 	{
@@ -46,12 +47,62 @@ int main(int argc, char *argv[])
 	case 5://写视频
 		writeVideo();
 		break;
+	case 6:
+		showVideo();
+		break;
 	default:
 		printf("arg is not right\n");
 		break;
 	}	
 	waitKey(0);
 	return 0;
+}
+int showVideo()
+{
+	Mat imo;
+	VideoCapture capo;
+	capo.open("/home/lxg-/code/video/tmp_o.avi");
+	//cap.open("test.avi");
+	if(!capo.isOpened())
+	{
+		printf("can not open video_o\n");
+		return -1;
+	}
+	namedWindow("video_o");
+	moveWindow("video_o", 20,15);
+
+	Mat imb;
+	VideoCapture capb;
+	capb.open("/home/lxg-/code/video/tmp_b.avi");
+	if(!capb.isOpened())
+	{
+		printf("can not open video_b\n");
+		return -1;
+	}
+	namedWindow("video_b");
+	moveWindow("video_b", 350, 15);
+
+	while(1)
+	{
+		capo >> imo;
+		if(imo.empty())
+		{
+			printf("video_o end\n");
+			break;
+		}
+		
+		imshow("video_o", imo);
+
+		capb >> imb;
+		if(imb.empty())
+		{
+			printf("video_b end\n");
+			break;
+		}
+		
+		imshow("video_b", imb);
+		waitKey(40);
+	}
 }
 
 int writeVideo()

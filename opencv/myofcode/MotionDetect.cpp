@@ -28,7 +28,6 @@ extern "C"
 };
 using namespace cv;
 
-//#define  DEBIAN
 
 int maxLevelNum = 1;//金字塔层数，从0开始
 float g_ofpyrThreshold = 0.001f;//解算光流过程中，G矩阵较小特征值比较
@@ -43,7 +42,7 @@ double sumTime;
 
 struct global_struct global_data;
 
-int xtofOpticalFlow(Mat &imgPrev);
+int xtofOpticalFlow(Mat &imgPrev, Mat &imgDisplay);
 void debugDrawCurve(float x, float y);
 void globalDataInit();
 
@@ -77,7 +76,7 @@ int main(int argc, char *argv[])
 	}
 
 	//光流算法初始化部分，第一帧图片的获取
-	Mat frame, image;
+	Mat frame, image, imgDisplay;
 	cap >> frame;
 	if (frame.empty()) return -1;
 	global_data.img.leftupX = (frame.cols - IMG_SELECT_AREA) / 2;
@@ -106,7 +105,10 @@ int main(int argc, char *argv[])
 		}
 
 	}
-
+	if(global_data.param[PARAM_SAVE_TEST_VIDEO])
+	{
+		saveVideoInit();
+	}
 
 #ifdef DEBUG
 	//cout重定向
@@ -146,6 +148,8 @@ int main(int argc, char *argv[])
 		frame = frame(Rect(global_data.img.leftupX, global_data.img.leftupY, IMG_SELECT_AREA, IMG_SELECT_AREA));
 		cvtColor(frame, frame, COLOR_BGR2GRAY);
 		resize(frame, image, Size(), IMG_SCALE, IMG_SCALE);
+
+		image.copyTo(imgDisplay);
 		//remap(image, image, cameraMapX, cameraMapY, INTER_LINEAR);//图像摄像机畸变矫正,浪费时间
 		if(global_data.param[PARAM_PREPROCESS_ISC])
 		{
@@ -154,7 +158,7 @@ int main(int argc, char *argv[])
 
 
 		double localTime = (double)getTickCount();
-		xtofOpticalFlow(image);
+		xtofOpticalFlow(image, imgDisplay);
 		//printf("cameratime%3.2f\t", ((double)getTickCount() - funTime) / getTickFrequency() * 1000);
 
 		funTime = ((double)getTickCount() - funTime) / getTickFrequency() * 1000;
@@ -183,7 +187,7 @@ int main(int argc, char *argv[])
 * Function:
 * Date: 2016/07/04 23:41
 *****************************************************************************************/
-int xtofOpticalFlow(Mat &imgPrev)
+int xtofOpticalFlow(Mat &imgPrev, Mat &imgDisplay)
 {
 	static Mat imgPost; //后一帧图像，
 	static vector<Mat> imgPyrPrev;
@@ -319,27 +323,31 @@ int xtofOpticalFlow(Mat &imgPrev)
 	}
 #ifndef DEBIAN
 	debugDrawCurve(g_cameraShiftX,g_cameraShiftY);
-	Mat imgPostTmp;
-	imgPost.copyTo(imgPostTmp);
-	cvtColor(imgPostTmp, imgPostTmp, CV_GRAY2BGR);
+	cvtColor(imgDisplay, imgDisplay, CV_GRAY2BGR);
 	
 	for (int i = 0; i < cornerPostC.size(); i++)
 	{
 		if (1 == affineInlier.at<unsigned char>(i))
 		{
-			circle(imgPostTmp, cornerPostC[i], 1, Scalar(255, 0, 0), -1, 8);//因为swap函数imgpPrev实为post
-			circle(imgPostTmp, cornerPrevC[i], 1, Scalar(255, 0, 0), -1, 8);//因为swap函数imgPost实为Prev
-			line(imgPostTmp,cornerPrevC[i],cornerPostC[i],Scalar(255, 0, 0));
+			circle(imgDisplay, cornerPostC[i], 1, Scalar(255, 0, 0), -1, 8);//因为swap函数imgpPrev实为post
+			circle(imgDisplay, cornerPrevC[i], 1, Scalar(255, 0, 0), -1, 8);//因为swap函数imgPost实为Prev
+			line(imgDisplay,cornerPrevC[i],cornerPostC[i],Scalar(255, 0, 0));
 		}
 		else
 		{
-			circle(imgPostTmp, cornerPostC[i], 2, Scalar(0, 0, 255), -1, 8);//因为swap函数imgpPrev实为post
-			circle(imgPostTmp, cornerPrevC[i], 2, Scalar(0, 0, 255), -1, 8);//因为swap函数imgPost实为Prev
-			line(imgPostTmp,cornerPrevC[i],cornerPostC[i],Scalar(0, 0, 255));
+			circle(imgDisplay, cornerPostC[i], 2, Scalar(0, 0, 255), -1, 8);//因为swap函数imgpPrev实为post
+			circle(imgDisplay, cornerPrevC[i], 2, Scalar(0, 0, 255), -1, 8);//因为swap函数imgPost实为Prev
+			line(imgDisplay,cornerPrevC[i],cornerPostC[i],Scalar(0, 0, 255));
 		}
 	}
-	resize(imgPostTmp,imgPostTmp,Size(300,300));
-	cv::imshow("camera",imgPostTmp);
+	resize(imgDisplay,imgDisplay,Size(300,300));
+	cv::imshow("camera",imgDisplay);
+
+	if(global_data.param[PARAM_SAVE_TEST_VIDEO])
+	{
+		printf("write video\n");
+		saveVideo(imgDisplay);
+	}
 #endif
 	
 #ifdef DEBUG
@@ -383,8 +391,8 @@ void globalDataInit()
 	mavlink_system.sysid = 1;
 	mavlink_system.compid = 200;
 
-	global_data.mavlink= MAVLINK_COMM_UART;//NET UART
-	global_data.param[PARAM_SEND_DATA] = SEND_DATA_UART;//SEND_DATA_UART,SEND_DATA_MAVLNK,FALSE
+	global_data.mavlink= MAVLINK_COMM_NET;//MAVLINK_COMM_NET, MAVLINK_COMM_NRF
+	global_data.param[PARAM_SEND_DATA] = SEND_DATA_MAVLINK;//SEND_DATA_UART,SEND_DATA_MAVLNK,FALSE
 
 	global_data.param[PARAM_SENSOR_ID] = 200;
 
@@ -396,9 +404,11 @@ void globalDataInit()
 	global_data.img.height =  IMG_SELECT_AREA * IMG_SCALE;
 
 	global_data.param[PARAM_SONAR_RAW] = FALSE;
-	global_data.param[PARAM_FIX_POINT] = TRUE;
+	global_data.param[PARAM_FIX_POINT] = TRUE;//固定点，指不计算容易跟踪的点
 
 	global_data.param[PARAM_PREPROCESS_ISC] = TRUE;
+	global_data.param[PARAM_SAVE_TEST_VIDEO] = TRUE;//保存视频
+
 }
 
 #define DEBUGARRAYLENGTH 201
@@ -415,8 +425,8 @@ void debugDrawCurve(float x, float y)
 	int arrayLength = DEBUGARRAYLENGTH - 1;
 	int max = 150, min = -150;
 
-	x *= 10;//放大10倍
-	y *= 10;
+	x *= 20;//放大10倍
+	y *= 20;
 	if (x > max) x = max;
 	if (x < min) x = min;
 	if (y > max) y = max;

@@ -20,9 +20,9 @@ int preprocessImISC(Mat &srcIm)
 	for(int i = 0; i < rows; i++)
 	{
 		p = srcIm.ptr<uchar>(i);
-		for(int j = 0; j < cols - 1; ++j)
+		for(int j = 0; j < cols - 3; ++j)
 		{
-			if(*p > *(p+1))
+			if(*p > *(p+3))
 			{
 				*p |= 0xff;
 			}

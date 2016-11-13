@@ -17,6 +17,7 @@ extern "C"
 #define TRUE 0
 
 int g_nrfFd;
+VideoWriter cap;
 
 int usbNrfInit()
 {
@@ -44,4 +45,21 @@ int nrfSend(float x, float y)
 
     sprintf(buf, "%2.3f,%2.3f\n", x, y);
     write(g_nrfFd, buf, strlen(buf));
+}
+int saveVideoInit()
+{
+    int codec = CV_FOURCC('M', 'J', 'P', 'G');
+    double fps = 25.0;
+
+
+    cap.open("/home/lxg-/code/video/tmp.avi", codec, fps, Size(300, 300));
+    if(!cap.isOpened())
+    {
+        printf("can not open video\n");
+        return -1;
+    }
+}
+int saveVideo(Mat &im)
+{
+    cap << im;
 }

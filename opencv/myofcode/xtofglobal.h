@@ -1,8 +1,9 @@
 #ifndef _XTOFGLOBAL_H_
 #define _XTOFGLOBAL_H_
 
-#include <opencv2/opencv.hpp>
 #include "mavlink/common/mavlink.h"
+
+
 
 #define  CAMERA_WIDTH 640 //视频宽度
 #define  CAMERA_LENGTH 480 //视频长度
@@ -70,7 +71,7 @@ enum global_param_id
 	PARAM_PREPROCESS_ISC,
 
 	PARAM_FIX_POINT,
-
+	PARAM_SAVE_TEST_VIDEO,
 	ON_BOARD_PARAM_COUNT
 };
 //image destination size

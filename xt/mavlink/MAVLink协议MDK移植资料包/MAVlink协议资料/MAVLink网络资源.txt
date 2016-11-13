@@ -1,5 +1,0 @@
-http://www.qgroundcontrol.org/mavlink/start
-
-http://ardupilot.org/dev/docs/mavlink-commands.html
-
-https://pixhawk.ethz.ch/mavlink/

@@ -8,6 +8,8 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <time.h>
+#include "debug.h"
+
 #if (defined __QNX__) | (defined __QNXNTO__)
     /* QNX specific headers */
     #include <unix.h>
@@ -231,7 +233,7 @@ int mavlinkNetInit()
     
     // Change the target ip if parameter was given
     #ifdef DEBIAN
-        strcpy(target_ip, "115.156.233.176");
+        strcpy(target_ip, "10.42.0.1");
     #else
         strcpy(target_ip, "127.0.0.1");
     #endif

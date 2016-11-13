@@ -73,6 +73,8 @@ xtofReadSonar.h
 /home/lxg-/code/opencv/myofcode/xtofReadSonar.h
 
 /home/lxg-/code/opencv/myofcode/debug.h
+opencv2/opencv.hpp
+/home/lxg-/code/opencv/myofcode/opencv2/opencv.hpp
 
 /home/lxg-/code/opencv/myofcode/mavlink/checksum.h
 
@@ -523,8 +525,6 @@ termios.h
 -
 
 /home/lxg-/code/opencv/myofcode/xtofglobal.h
-opencv2/opencv.hpp
--
 mavlink/common/mavlink.h
 /home/lxg-/code/opencv/myofcode/mavlink/common/mavlink.h
 
@@ -549,6 +549,8 @@ fcntl.h
 -
 time.h
 -
+debug.h
+/home/lxg-/code/opencv/myofcode/debug.h
 unix.h
 -
 sys/time.h
