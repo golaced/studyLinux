@@ -7,7 +7,7 @@
             "request": "launch",
             //"program": "enter program name, for example ${workspaceRoot}/a.out",
             "program": "${workspaceRoot}/myapp",
-            "args": ["video3ss.avi"],
+           // "args": ["video3ss.avi"],
             "stopAtEntry": false,
             "cwd": "${workspaceRoot}",
             "environment": [],

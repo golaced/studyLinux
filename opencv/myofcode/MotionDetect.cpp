@@ -30,7 +30,7 @@ using namespace cv;
 
 
 int maxLevelNum = 1;//金字塔层数，从0开始
-float g_ofpyrThreshold = 0.001f;//解算光流过程中，G矩阵较小特征值比较
+float g_ofpyrThreshold = 0.0f;//0.001f;//解算光流过程中，G矩阵较小特征值比较
 double g_ofAffineThreshold = 2.;//可以把一个点看作内点的最大误差
 double g_ofAffineQuality = 0.96;//仿射变换置信度，与迭代次数相关
 
@@ -55,12 +55,13 @@ int main(int argc, char *argv[])
 
 	if(argc != 1) 
 	{
-		string path = "/home/lxg-/code/video/";
+		string path = "/home/lxg-/video/";
 		videoName = path + argv[1];
 		cap.open(videoName);
 	} 
 	else 
 	{
+		printf("try to open cap 0\n");
 		cap.open(0);
 	}
 
@@ -105,10 +106,12 @@ int main(int argc, char *argv[])
 		}
 
 	}
+#ifndef DEBIAN
 	if(global_data.param[PARAM_SAVE_TEST_VIDEO])
 	{
 		saveVideoInit();
 	}
+#endif
 
 #ifdef DEBUG
 	//cout重定向
@@ -140,7 +143,7 @@ int main(int argc, char *argv[])
 	{
 		double funTime = (double)getTickCount();
 		cap >> frame; 
-		printf("cameratime%3.2f\t", ((double)getTickCount() - funTime) / getTickFrequency() * 1000);
+		printf("cameraT %3.2f\t", ((double)getTickCount() - funTime) / getTickFrequency() * 1000);
 		if (frame.empty()||(cKey == 's'))
 		{
 			break;
@@ -162,7 +165,7 @@ int main(int argc, char *argv[])
 		//printf("cameratime%3.2f\t", ((double)getTickCount() - funTime) / getTickFrequency() * 1000);
 
 		funTime = ((double)getTickCount() - funTime) / getTickFrequency() * 1000;
-		printf("funtime%3.2f\t", funTime);
+		printf("funT %3.2f\t", funTime);
 		cKey=waitKey(1);
 	}
 
@@ -176,7 +179,13 @@ int main(int argc, char *argv[])
 	cout << asctimeChar;
 #endif
 
-	system("pause.\n");
+#ifndef DEBIAN
+	if(global_data.param[PARAM_SAVE_TEST_VIDEO])
+	{
+		closeSaveVideo();
+	}
+#endif
+
 	return 0;
 }
 /****************************************************************************************
@@ -380,7 +389,7 @@ int xtofOpticalFlow(Mat &imgPrev, Mat &imgDisplay)
 	//	cv::imwrite(str2, imgPostTmp);
 	//}
 #else
-	printf("%1.4f    %1.4f    \n", g_cameraShiftX, g_cameraShiftY);
+	printf("%2.3f %2.3f\n", g_cameraShiftX, g_cameraShiftY);
 #endif
 
 	return 1;

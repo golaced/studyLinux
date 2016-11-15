@@ -5,7 +5,7 @@
 using namespace cv;
 
 
-#define  DEBIAN
+//#define  DEBIAN
 
 
 #define NRF_DEVICE "/dev/ttyUSB1"
@@ -15,5 +15,6 @@ int usbNrfInit();
 int nrfSend(float x, float y);
 int saveVideoInit();
 int saveVideo(Mat &im);
+int closeSaveVideo();
 
 #endif

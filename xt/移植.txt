@@ -1,0 +1,51 @@
+默认用户是pi 密码为raspberry
+
+一、虚拟机启动及密码
+双击桌面VMware Workstation Pro图标。
+
+二、windows和虚拟机linux环境共享数据
+通过window目录D:\RK3288，通过linux路径/mnt/hgfs/RK3288访问。
+
+三、sd卡备份和恢复
+备份（推荐备份到共享目录/mnt/hgfs/RK3288，因为需要8G空间）：
+1、插入sd卡之前和之后分别使用fdisk -l 命令查看要备份的sd卡挂载分区。假如需要备份的sd卡分区为/dev/sde*。
+2、卸载这两个分区：umount /dev/sde1;umount /dev/sde2	//卸载掉还怎么备份？？？
+3、cd到/mnt/hgfs/RK3288目录，执行命令dd if=/dev/sde of=sdimage.img bs=4M
+
+恢复(假设sd卡分区为/dev/sde)
+恢复sd卡内容之前建议格式化sd卡并分区，方法如下：
+1、将sd卡分区信息擦除。建议擦除sd卡前面1G，执行命令：dd if=/dev/zero of=/dev/sde bs=4M count=256
+2、将sd卡分为两个区，第一个60M,第二个占满剩余空间
+执行命令fdisk /dev/sde,按指示完成操作。
+3、格式化分区。需要将sd卡第一个分区格式化为vfat，第二个格式化为ext4.
+mkfs.vfat /dev/sde1
+mkfs.ext4 /dev/sde2
+
+
+格式化好的sd卡恢复过程如下：
+1、插上sd卡fdisk -l查看分区
+2、cd到/mnt/hgfs/RK3288目录，执行命令dd if=sdimage.img of=/dev/sde bs=4M
+
+四、建立自己的工程（如MotionDetect）
+1、在合适路径建立目录：mkdir MotionDectet;
+2、cd到工程目录MotionDetect;添加程序文件(包括头文件.h,源文件.cpp/.c)；
+3、添加CMakeLists.txt文件。考虑从已有工程拷贝此文件，修改相关部分。（1-跟工程名有关部分；2-跟源码列表有关部分）
+4、通过cmake生成makefile。建议删除源码目录下CMakeCache.txt,而后执行"cmake ./"
+5、编译生成可执行程序。先执行make clean，然后执行make命令。
+6、当前目录下会生成可执行文件MotionDetect。
+7、通过“./MotionDetect”形式执行程序。
+
+五、开机自动启动程序
+1、把可执行程序，如MotionDetect拷贝到sd卡bin目录下（相当于系统目录，可以直接输入命令名启动程序）
+2、编辑/etc/profile文件，在最后添加运行程序的代码。
+
+六、如何编译飞控并运行
+1、在window目录D:\RK3288下目录ardupilot-raspilot目录为飞控源码。
+2、拷贝飞控源码到linux系统。如cp -r ardupilot-raspilot /home/szt/Downloads将源码拷贝到Downloads目录。
+2、cd 到Downloads目录飞控源码目录子目录ArduCopter，看到sh文件build.sh.
+3、编译飞控。命令行执行命令“./build.sh raspilot”。
+4、编译顺利完成在当前目录生成可执行文件ArduCopter.elf，拷贝到sd卡bin目录，根据需要确定是不是要开机自动运行。
+
+七、如何获取姿态数据或gps数据。
+1、姿态数据现在从飞控获取，需要运行ArduCopter.elf。集成到自己工程的方法是将PilotData.h,PilotData.c两个文件拷贝到工程，进行调用即可。
+2、Gps数据需要从传感器直接获取，集成到自己工程的方法是将GpsParse.h,GpsParse.c两个文件拷贝到工程，调用。
