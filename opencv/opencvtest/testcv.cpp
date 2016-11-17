@@ -61,46 +61,46 @@ int showVideo()
 {
 	Mat imo;
 	VideoCapture capo;
-	capo.open("/home/lxg-/code/video/tmp_o.avi");
+	capo.open("/home/lxg-/video/tmp_o.avi");
 	//cap.open("test.avi");
 	if(!capo.isOpened())
 	{
-		printf("can not open video_o\n");
+		printf("can not open tmp_o\n");
 		return -1;
 	}
-	namedWindow("video_o");
-	moveWindow("video_o", 20,15);
+	namedWindow("tmp_o");
+	moveWindow("tmp_o", 20,15);
 
 	Mat imb;
 	VideoCapture capb;
-	capb.open("/home/lxg-/code/video/tmp_b.avi");
+	capb.open("/home/lxg-/video/tmp_b.avi");
 	if(!capb.isOpened())
 	{
-		printf("can not open video_b\n");
+		printf("can not open tmp_b\n");
 		return -1;
 	}
-	namedWindow("video_b");
-	moveWindow("video_b", 350, 15);
+	namedWindow("tmp_b");
+	moveWindow("tmp_b", 350, 15);
 
 	while(1)
 	{
 		capo >> imo;
 		if(imo.empty())
 		{
-			printf("video_o end\n");
+			printf("tmp_o end\n");
 			break;
 		}
 		
-		imshow("video_o", imo);
+		imshow("tmp_o", imo);
 
 		capb >> imb;
 		if(imb.empty())
 		{
-			printf("video_b end\n");
+			printf("tmp_b end\n");
 			break;
 		}
 		
-		imshow("video_b", imb);
+		imshow("tmp_b", imb);
 		waitKey(40);
 	}
 }

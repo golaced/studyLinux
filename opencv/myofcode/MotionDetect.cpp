@@ -45,7 +45,7 @@ struct global_struct global_data;
 int xtofOpticalFlow(Mat &imgPrev, Mat &imgDisplay);
 void debugDrawCurve(float x, float y);
 void globalDataInit();
-
+int ofFilterMediam(float &x, float &y);
 int main(int argc, char *argv[])
 {
 	globalDataInit();
@@ -281,6 +281,11 @@ int xtofOpticalFlow(Mat &imgPrev, Mat &imgDisplay)
 				//方案二
 				//利用视场角、高度信息，待写
 				//位移滤波
+
+				if(global_data.param[PARAM_FILTER_MEDIAM])//中值滤波
+				{
+					ofFilterMediam(g_cameraShiftX, g_cameraShiftY);
+				}
 			}
 		}
 	}
@@ -415,8 +420,10 @@ void globalDataInit()
 	global_data.param[PARAM_SONAR_RAW] = FALSE;
 	global_data.param[PARAM_FIX_POINT] = TRUE;//固定点，指不计算容易跟踪的点
 
-	global_data.param[PARAM_PREPROCESS_ISC] = TRUE;
+	global_data.param[PARAM_PREPROCESS_ISC] = FALSE;
 	global_data.param[PARAM_SAVE_TEST_VIDEO] = TRUE;//保存视频
+
+	global_data.param[PARAM_FILTER_MEDIAM] = TRUE;//对光流输出滤波
 
 }
 
@@ -462,4 +469,40 @@ void debugDrawCurve(float x, float y)
 		circle(im, Point2d(i * 3, imY[i]), 2, Scalar(0, 255, 0), -1, 8);
 	}
 	imshow("curve", im);
+}
+
+int ofFilterMediam(float &x, float &y)
+{
+	static float xx[3];
+	static float yy[3];
+
+	xx[2] = xx[1];
+	xx[1] = xx[0];
+
+	if(xx[2] > xx[1])
+	{
+		if(x > xx[2])
+		{
+			x = xx[2];
+		}
+		else if(x < xx[1])
+		{
+			x = xx[1];
+		}
+	}
+	
+	yy[2] = yy[1];
+	yy[1] = yy[0];
+
+	if(yy[2] > yy[1])
+	{
+		if(y > yy[2])
+		{
+			y = yy[2];
+		}
+		else if(y < yy[1])
+		{
+			y = yy[1];
+		}
+	}
 }

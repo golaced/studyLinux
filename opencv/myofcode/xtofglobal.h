@@ -72,6 +72,8 @@ enum global_param_id
 
 	PARAM_FIX_POINT,
 	PARAM_SAVE_TEST_VIDEO,
+
+	PARAM_FILTER_MEDIAM,
 	ON_BOARD_PARAM_COUNT
 };
 //image destination size
