@@ -7,7 +7,6 @@ using namespace cv;
 
 //#define  DEBIAN
 
-
 #define NRF_DEVICE "/dev/ttyUSB1"
 #define NRF_BAUDRATE 9600
 

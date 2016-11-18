@@ -491,7 +491,7 @@ int ofFilterMediam(float &x, float &y)
 		}
 	}
 	
-	yy[2] = yy[1];菜cd 
+	yy[2] = yy[1]; 
 	yy[1] = yy[0];
 
 	if(yy[2] > yy[1])
