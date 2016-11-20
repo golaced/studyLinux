@@ -467,6 +467,8 @@ mavlink_helpers.h
 /home/lxg-/code/opencv/myofcode/mavlink/mavlink_helpers.h
 
 /home/lxg-/code/opencv/myofcode/xtofAffine2D.cpp
+stdio.h
+/home/lxg-/code/opencv/myofcode/stdio.h
 xtofAffine2D.h
 /home/lxg-/code/opencv/myofcode/xtofAffine2D.h
 

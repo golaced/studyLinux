@@ -31,7 +31,7 @@ using namespace cv;
 
 int maxLevelNum = 1;//金字塔层数，从0开始
 float g_ofpyrThreshold = 0.0f;//0.001f;//解算光流过程中，G矩阵较小特征值比较
-double g_ofAffineThreshold = 2.;//可以把一个点看作内点的最大误差
+double g_ofAffineThreshold = 0.2;//可以把一个点看作内点的最大误差
 double g_ofAffineQuality = 0.96;//仿射变换置信度，与迭代次数相关
 
 float g_cameraHeight = 0.0f; //单位cm
@@ -259,6 +259,8 @@ int xtofOpticalFlow(Mat &imgPrev, Mat &imgDisplay)
 		affineInlier.create(1,cornerPrevC.size(),CV_8U);
 		affineInlier.setTo(1);
 
+		printf("cornerSize:%d\t", cornerPrevC.size());
+
 		if (cornerPrevC.size() > 4)
 		{
 			/*仿射变换矩阵求取*/
@@ -301,8 +303,10 @@ int xtofOpticalFlow(Mat &imgPrev, Mat &imgDisplay)
 			{
 				mavlink_msg_heartbeat_send(global_data.mavlink, MAV_TYPE_HELICOPTER, MAV_AUTOPILOT_GENERIC
 					, MAV_MODE_GUIDED_ARMED, 0, MAV_STATE_ACTIVE);
+				//像素距离扩大十倍显示
 				mavlink_msg_optical_flow_send(global_data.mavlink, microsSinceEpoch(), global_data.param[PARAM_SENSOR_ID]
-					, affine2D.at<double>(0, 2), affine2D.at<double>(1, 2), g_cameraShiftX, g_cameraShiftY, of_quality, g_cameraHeight);
+					, affine2D.at<double>(0, 2), affine2D.at<double>(1, 2)
+					, g_cameraShiftX, g_cameraShiftY, of_quality, g_cameraHeight);
 				//printf("send optical\n");
 			}
 
@@ -411,7 +415,7 @@ void globalDataInit()
 	global_data.param[PARAM_SENSOR_ID] = 200;
 
 	global_data.param[PARAM_SEND_OPTICAL_MAVLINK] = TRUE;
-	global_data.param[PARAM_SEND_VIDEO_MAVLINK] = FALSE;
+	global_data.param[PARAM_SEND_VIDEO_MAVLINK] = TRUE;
 	global_data.param[PARAM_SEND_SONAR_MAVLINK] = TRUE;
 
 	global_data.img.width =  IMG_SELECT_AREA * IMG_SCALE;//最终图像大小
@@ -420,8 +424,8 @@ void globalDataInit()
 	global_data.param[PARAM_SONAR_RAW] = FALSE;
 	global_data.param[PARAM_FIX_POINT] = TRUE;//固定点，指不计算容易跟踪的点
 
-	global_data.param[PARAM_PREPROCESS_ISC] = FALSE;
-	global_data.param[PARAM_SAVE_TEST_VIDEO] = TRUE;//保存视频
+	global_data.param[PARAM_PREPROCESS_ISC] = FALSE;//是否用ISC预处理
+	global_data.param[PARAM_SAVE_TEST_VIDEO] = FALSE;//保存视频
 
 	global_data.param[PARAM_FILTER_MEDIAM] = TRUE;//对光流输出滤波
 
@@ -473,6 +477,7 @@ void debugDrawCurve(float x, float y)
 
 int ofFilterMediam(float &x, float &y)
 {
+	//中值滤波
 	static float xx[3];
 	static float yy[3];
 
@@ -505,4 +510,44 @@ int ofFilterMediam(float &x, float &y)
 			y = yy[1];
 		}
 	}
+	
+	//限幅滤波
+	int max = 20;//单位cm
+	int min = 0 - max;
+	if(x > max)
+	{ 
+		x = max;
+	}
+	else if(x < min)
+	{
+		x = min;
+	}
+	if(y > max)
+	{
+		y = max;
+	}
+	else if(y < min)
+	{
+		y = min;
+	}
+
+	//低通滤波
+	static float xxx[4];
+	static float yyy[4];
+	float a = 0.2;
+	
+	x = x * (1-a) + xxx[0] * a;
+	// x = (xxx[3] + xxx[2] + xxx[1] + xxx[0] + x) / 5;
+	// xxx[3] = xxx[2];
+	// xxx[2] = xxx[1];
+	// xxx[1] = xxx[0];
+	xxx[0] = x;
+
+	y = y * (1-a) + yyy[0] * a;
+	// y = (yyy[3] + yyy[2] + yyy[1] + yyy[0] + y) / 5;
+	// yyy[3] = yyy[2];
+	// yyy[2] = yyy[1];
+	// yyy[1] = yyy[0];
+	yyy[0] = y;
+
 }

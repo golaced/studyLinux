@@ -1,3 +1,4 @@
+#include "stdio.h"
 #include "xtofAffine2D.h"
 using namespace cv;
 using namespace std;
@@ -51,8 +52,8 @@ int xtofAffine2D(InputArray _from, InputArray _to,
 	double epsilon = 0.00001;
 	param1 = param1 <= 0 ? 3 : param1;
 	param2 = (param2 < epsilon) ? 0.99 : (param2 > 1 - epsilon) ? 0.99 : param2;
-	
-	return Affine2DEstimator().runRANSAC(&m1, &m2, &F2x3, &mask, param1, param2);
+	Affine2DEstimator().runRANSAC(&m1, &m2, &F2x3, &mask, param1, param2);
+	return 1;
 }
 #ifdef _DEBUG_AFFINE
 /*****************************************************************************************
@@ -138,6 +139,10 @@ int Affine2DEstimator::findInliers(const CvMat* m1, const CvMat* m2,
 	threshold *= threshold;
 	for (i = 0; i < count; i++)
 		goodCount += mask[i] = err[i] <= threshold;
+	mask[0] = 0;
+	mask[1] = 0;
+	mask[3] = 0;
+	mask[4] = 0;
 	return goodCount;
 }
 
@@ -171,8 +176,8 @@ void Affine2DEstimator::computeReprojError(const CvMat* m1, const CvMat* m2, con
 }
 /*****************************************************************************************
 * name：runRANSAC
-* input：mask0 点是否为内点的标志量
-* output：model 输出放射变换参数
+* input：m1,m2
+* output：model 输出放射变换参数, mask0 点是否为内点的标志量
 * function：
 * Date：
 *****************************************************************************************/
@@ -181,7 +186,7 @@ bool Affine2DEstimator::runRANSAC(const CvMat* m1, const CvMat* m2, CvMat* model
 	double confidence, int maxIters)
 {
 	bool result = false;
-	cv::Ptr<CvMat> mask = cvCloneMat(mask0);//深复制？？
+	cv::Ptr<CvMat> mask = cvCloneMat(mask0);//空的复制没有具体的作用
 	cv::Ptr<CvMat> models, err, tmask;
 	cv::Ptr<CvMat> ms1, ms2;
 
@@ -248,11 +253,11 @@ bool Affine2DEstimator::runRANSAC(const CvMat* m1, const CvMat* m2, CvMat* model
 	{
 		if (mask != mask0)
 		{
-		//	cvCopy(mask, mask0);
 			mask0 = cvCloneMat(mask);
 		}
 		result = true;
 
+		printf("mask\t");
 		//用最小二乘法重新计算放射变换矩阵
 		Mat maskTmp = cvCloneMat(mask0);
 		cv::Mat_<cv::Vec<uchar,1> >::iterator it = maskTmp.begin<cv::Vec<uchar,1> >();

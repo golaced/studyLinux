@@ -37,7 +37,7 @@ protected:
 *****************************************************************************************/
 int xtofAffine2D(cv::InputArray _from, cv::InputArray _to,
 	cv::OutputArray _out, cv::OutputArray _inliers,
-	double param1 = 3, double param2 = 0.99);
+	double param1 = 1, double param2 = 0.99);
 
 void affineTest();
 
