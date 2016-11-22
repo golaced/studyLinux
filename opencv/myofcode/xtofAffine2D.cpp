@@ -139,10 +139,10 @@ int Affine2DEstimator::findInliers(const CvMat* m1, const CvMat* m2,
 	threshold *= threshold;
 	for (i = 0; i < count; i++)
 		goodCount += mask[i] = err[i] <= threshold;
-	mask[0] = 0;
-	mask[1] = 0;
-	mask[3] = 0;
-	mask[4] = 0;
+	// mask[0] = 0;
+	// mask[1] = 0;
+	// mask[3] = 0;
+	// mask[4] = 0;
 	return goodCount;
 }
 
@@ -249,11 +249,12 @@ bool Affine2DEstimator::runRANSAC(const CvMat* m1, const CvMat* m2, CvMat* model
 	}//ransac迭代结束
 
 	/*把内点带入进行解算仿射变换矩阵*/
-	if (maxGoodCount > 3)
+	if (maxGoodCount > 5)
 	{
 		if (mask != mask0)
 		{
-			mask0 = cvCloneMat(mask);
+			//mask0 = cvCloneMat(mask);//不能这样复制，指针被覆盖
+			cvCopy(mask, mask0);//复制数据，指针不被覆盖
 		}
 		result = true;
 

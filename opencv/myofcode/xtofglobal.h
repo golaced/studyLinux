@@ -5,15 +5,16 @@
 
 
 
-#define  CAMERA_WIDTH 640 //视频宽度
-#define  CAMERA_LENGTH 480 //视频长度
+// #define  CAMERA_WIDTH 640 //视频宽度
+// #define  CAMERA_LENGTH 480 //视频长度
 
-#define  IMG_SELECT_AREA 200  //视频截取区域边长
-#define  IMG_SCALE 0.5 //视频截取图像缩放比例
-#define  IMG_SELECT_X 220	//视频截取图像左上角x坐标
-#define  IMG_SELECT_Y 140  //视频截取图像左上角y坐标
-#define  IMG_SELECT_WIDTH 200  //视频截取图像宽度
-#define  IMG_SELECT_LENGTH 200 //视频截取图像长度
+#define  IMG_SELECT_AREA 400  //视频截取区域边长
+#define  IMG_SCALE 0.25 //视频截取图像缩放比例
+
+// #define  IMG_SELECT_X 220	//视频截取图像左上角x坐标
+// #define  IMG_SELECT_Y 140  //视频截取图像左上角y坐标
+// #define  IMG_SELECT_WIDTH 200  //视频截取图像宽度
+// #define  IMG_SELECT_LENGTH 200 //视频截取图像长度
 
 
 #define  CAMERA_FOCAL_X 665.4535
@@ -68,6 +69,7 @@ enum global_param_id
 	PARAM_FIX_POINT,
 	PARAM_SAVE_TEST_VIDEO,
 
+	PARAM_FILTER_IMG,
 	PARAM_FILTER_MEDIAM,
 	ON_BOARD_PARAM_COUNT
 };

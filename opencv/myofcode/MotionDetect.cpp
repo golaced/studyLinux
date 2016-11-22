@@ -30,8 +30,8 @@ using namespace cv;
 
 
 int maxLevelNum = 1;//金字塔层数，从0开始
-float g_ofpyrThreshold = 0.0f;//0.001f;//解算光流过程中，G矩阵较小特征值比较
-double g_ofAffineThreshold = 0.2;//可以把一个点看作内点的最大误差
+float g_ofpyrThreshold = 0.0001f;//0.001f;//解算光流过程中，G矩阵较小特征值比较
+double g_ofAffineThreshold = 2;//可以把一个点看作内点的最大误差
 double g_ofAffineQuality = 0.96;//仿射变换置信度，与迭代次数相关
 
 float g_cameraHeight = 0.0f; //单位cm
@@ -43,7 +43,7 @@ double sumTime;
 struct global_struct global_data;
 
 int xtofOpticalFlow(Mat &imgPrev, Mat &imgDisplay);
-void debugDrawCurve(float x, float y);
+void debugDrawCurve(float x, float y, string s);
 void globalDataInit();
 int ofFilterMediam(float &x, float &y);
 int main(int argc, char *argv[])
@@ -61,17 +61,17 @@ int main(int argc, char *argv[])
 	} 
 	else 
 	{
-		printf("try to open cap 0\n");
-		cap.open(0);
+		printf("try to open cap 1\n");
+		cap.open(1);
 	}
 
 
 	if (!cap.isOpened()) {
-		printf("can not open cap 0!\n");
-		cap.open(1);
+		printf("can not open cap 1!\n");
+		cap.open(0);
 		if(!cap.isOpened())
 		{
-			printf("can not open cap 1\n");
+			printf("can not open cap 0\n");
 			return 0;
 		}
 	}
@@ -80,6 +80,11 @@ int main(int argc, char *argv[])
 	Mat frame, image, imgDisplay;
 	cap >> frame;
 	if (frame.empty()) return -1;
+	if(frame.cols < IMG_SELECT_AREA)
+	{
+		printf("select area is larger than camera\n");
+		return 1;
+	}
 	global_data.img.leftupX = (frame.cols - IMG_SELECT_AREA) / 2;
 	global_data.img.leftupY = (frame.rows - IMG_SELECT_AREA) / 2;
 
@@ -151,7 +156,10 @@ int main(int argc, char *argv[])
 		frame = frame(Rect(global_data.img.leftupX, global_data.img.leftupY, IMG_SELECT_AREA, IMG_SELECT_AREA));
 		cvtColor(frame, frame, COLOR_BGR2GRAY);
 		resize(frame, image, Size(), IMG_SCALE, IMG_SCALE);
-
+		if(global_data.param[PARAM_FILTER_IMG])
+		{
+			GaussianBlur(image, image, Size(3,3), 0, 0);//对初始图像滤波
+		}
 		image.copyTo(imgDisplay);
 		//remap(image, image, cameraMapX, cameraMapY, INTER_LINEAR);//图像摄像机畸变矫正,浪费时间
 		if(global_data.param[PARAM_PREPROCESS_ISC])
@@ -340,7 +348,7 @@ int xtofOpticalFlow(Mat &imgPrev, Mat &imgDisplay)
 		}
 	}
 #ifndef DEBIAN
-	debugDrawCurve(g_cameraShiftX,g_cameraShiftY);
+	debugDrawCurve(g_cameraShiftX,g_cameraShiftY, "curve1");
 	cvtColor(imgDisplay, imgDisplay, CV_GRAY2BGR);
 	
 	for (int i = 0; i < cornerPostC.size(); i++)
@@ -358,6 +366,7 @@ int xtofOpticalFlow(Mat &imgPrev, Mat &imgDisplay)
 			line(imgDisplay,cornerPrevC[i],cornerPostC[i],Scalar(0, 0, 255));
 		}
 	}
+
 	resize(imgDisplay,imgDisplay,Size(300,300));
 	cv::imshow("camera",imgDisplay);
 
@@ -425,15 +434,15 @@ void globalDataInit()
 	global_data.param[PARAM_FIX_POINT] = TRUE;//固定点，指不计算容易跟踪的点
 
 	global_data.param[PARAM_PREPROCESS_ISC] = FALSE;//是否用ISC预处理
-	global_data.param[PARAM_SAVE_TEST_VIDEO] = FALSE;//保存视频
-
+	global_data.param[PARAM_SAVE_TEST_VIDEO] = TRUE;//保存视频
+	global_data.param[PARAM_FILTER_IMG] = FALSE;//是否对原图像高斯滤波
 	global_data.param[PARAM_FILTER_MEDIAM] = TRUE;//对光流输出滤波
 
 }
 
 #define DEBUGARRAYLENGTH 201
 
-void debugDrawCurve(float x, float y)
+void debugDrawCurve(float x, float y, string s)
 {
 	Size winSize(700, 400);
 	Mat im = Mat::zeros(winSize, CV_8UC3);
@@ -472,7 +481,7 @@ void debugDrawCurve(float x, float y)
 		circle(im, Point2d(i * 3, imX[i]), 2, Scalar(0, 0, 255), -1, 8);
 		circle(im, Point2d(i * 3, imY[i]), 2, Scalar(0, 255, 0), -1, 8);
 	}
-	imshow("curve", im);
+	imshow(s, im);
 }
 
 int ofFilterMediam(float &x, float &y)

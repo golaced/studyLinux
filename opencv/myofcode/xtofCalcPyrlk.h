@@ -3,7 +3,7 @@
 
 #include <opencv2/opencv.hpp>
 
-#define WIN_SIZE  21 //建立光流金字塔时用到，在光流解算时是G矩阵的求和范围，相当于光流的搜索范围 
+#define WIN_SIZE  21 //建立光流金字塔时用到，在光流解算时是G矩阵的求和范围，相当于光流的搜索范围 //opencv自带是31
 
 namespace cv
 {
