@@ -15,7 +15,7 @@ using namespace std;
 #include <iostream>
 #include <iomanip>
 #include <time.h>
-
+#include <math.h>
 #include "debug.h"
 
 #include "mavlink/common/mavlink.h"
@@ -29,8 +29,8 @@ extern "C"
 using namespace cv;
 
 
-int maxLevelNum = 1;//金字塔层数，从0开始
-float g_ofpyrThreshold = 0.0001f;//0.001f;//解算光流过程中，G矩阵较小特征值比较
+int maxLevelNum = 4;//金字塔层数，从0开始
+float g_ofpyrThreshold = 0.0003f;//0.001f;//解算光流过程中，G矩阵较小特征值比较
 double g_ofAffineThreshold = 2;//可以把一个点看作内点的最大误差
 double g_ofAffineQuality = 0.96;//仿射变换置信度，与迭代次数相关
 
@@ -158,7 +158,8 @@ int main(int argc, char *argv[])
 		resize(frame, image, Size(), IMG_SCALE, IMG_SCALE);
 		if(global_data.param[PARAM_FILTER_IMG])
 		{
-			GaussianBlur(image, image, Size(3,3), 0, 0);//对初始图像滤波
+			//GaussianBlur(image, image, Size(3,3), 0, 0);//对初始图像滤波
+			blur(image, image, Size(3,3));
 		}
 		image.copyTo(imgDisplay);
 		//remap(image, image, cameraMapX, cameraMapY, INTER_LINEAR);//图像摄像机畸变矫正,浪费时间
@@ -232,24 +233,28 @@ int xtofOpticalFlow(Mat &imgPrev, Mat &imgDisplay)
 		buildOpticalFlowPyramid(imgPost, imgPyrPost, Size(WIN_SIZE, WIN_SIZE), maxLevelNum, false);
 	}
 	
-	vector<Point2f> cornerPrev, cornerPost;
+	vector<Point2f> cornerPrev, cornerPost;//6*6=36个固定点
 	if(global_data.param[PARAM_FIX_POINT]) {
 		cornerPost.clear();
 		for (int i = 0; i < 6; i++)	{
 			for (int j = 0; j < 6; j++)
-				cornerPost.push_back(Point(j * 16 + 9, i * 16 + 9));
+				cornerPost.push_back(Point(j * 15 + 12, i * 15 + 12));
 		}
-	} else {
+	} 
+	else 
+	{
 		xtofCornerToTrack(imgPost, cornerPost, mask, WIN_SIZE);//blockSize = 21  找角点的计算特征值模板的大小
 	}
 	maxLevelNum = buildOpticalFlowPyramid(imgPrev, imgPyrPrev, Size(WIN_SIZE, WIN_SIZE), maxLevelNum, false);
+	//printf("levelNum:%d ", maxLevelNum);
 
 	if (cornerPost.size() > 6)
 	{
 		vector<uchar> cornerStatus;
 		vector<float> cornerErr; 
-
-		TermCriteria cornerTermcrit(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 20, 0.03);//迭代次数和迭代精度
+		
+		//光流迭代条件设置
+		TermCriteria cornerTermcrit(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 17, 0.01);//迭代次数和迭代精度
 		//g_ofpyrThreshold判断跟踪失败的阈值，大于g_ofpyrThreshold会判断为跟踪失败,与G矩阵较小的特征值进行比较
 		xtofCalcPyrlk(imgPyrPost, imgPyrPrev, cornerPost, cornerPrev, cornerStatus, cornerErr, cornerTermcrit, g_ofpyrThreshold, maxLevelNum);
 
@@ -258,21 +263,28 @@ int xtofOpticalFlow(Mat &imgPrev, Mat &imgDisplay)
 		{
 			if ((cornerStatus[cornerNum]) || (cornerErr[cornerNum] > 40))
 			{
+				// float x = floor(cornerPrev[cornerNum].x + 0.5);
+				// float y = floor(cornerPrev[cornerNum].y + 0.5);
+				// cornerPrevC.push_back(Point2f(x,y));
+
 				cornerPrevC.push_back(cornerPrev[cornerNum]);
 				cornerPostC.push_back(cornerPost[cornerNum]);
 				cornerPostMask.push_back(cornerPrev[cornerNum]);//prev的角点在下一循环的新图像上,需要判断角点之间的距离来生成
 			}
 		}
+				printf("xtofAffine\n");
 
 		affineInlier.create(1,cornerPrevC.size(),CV_8U);
 		affineInlier.setTo(1);
 
-		printf("cornerSize:%d\t", cornerPrevC.size());
+		printf("cornerSize:%d\t", (int)cornerPrevC.size());
 
 		if (cornerPrevC.size() > 4)
 		{
+			int inlierNum = 0;
 			/*仿射变换矩阵求取*/
-			if (xtofAffine2D(cornerPrevC, cornerPostC, affine2D, affineInlier, g_ofAffineThreshold, g_ofAffineQuality))
+			
+			if (xtofAffine2D(inlierNum, cornerPrevC, cornerPostC, affine2D, affineInlier, g_ofAffineThreshold, g_ofAffineQuality))
 			{
 				if ((affine2D.at<double>(0, 0) < -2) || (affine2D.at<double>(0, 0) > 2)
 					|| (affine2D.at<double>(1, 1) < -2) || (affine2D.at<double>(1, 1) > 2)
@@ -281,11 +293,10 @@ int xtofOpticalFlow(Mat &imgPrev, Mat &imgDisplay)
 				{
 					affine2D.setTo(0);
 				}
-
 				/*计算实际位移*/
 				//方案一
-				g_cameraShiftX = (float)(affine2D.at<double>(0, 2) / CAMERA_FOCAL_X * g_cameraHeight / IMG_SCALE);
-				g_cameraShiftY = (float)(affine2D.at<double>(1, 2) / CAMERA_FOCAL_Y * g_cameraHeight / IMG_SCALE);
+				g_cameraShiftX = 0 - (float)(affine2D.at<double>(0, 2) / CAMERA_FOCAL_X * g_cameraHeight / IMG_SCALE);
+				g_cameraShiftY = 0 - (float)(affine2D.at<double>(1, 2) / CAMERA_FOCAL_Y * g_cameraHeight / IMG_SCALE);
 				//distanceSumX += distanceX;
 				//distanceSumY += distanceY;
 				//方案二
@@ -301,6 +312,36 @@ int xtofOpticalFlow(Mat &imgPrev, Mat &imgDisplay)
 	}
 	swap(imgPyrPost, imgPyrPrev);
 	swap(imgPost, imgPrev);
+
+#ifndef DEBIAN
+	debugDrawCurve(g_cameraShiftX,g_cameraShiftY, "curve1");
+	cvtColor(imgDisplay, imgDisplay, CV_GRAY2BGR);
+	
+	for (int i = 0; i < cornerPostC.size(); i++)
+	{
+		if (1 == affineInlier.at<unsigned char>(i))
+		{
+			circle(imgDisplay, cornerPostC[i], 1, Scalar(255, 0, 0), -1, 8);//因为swap函数imgpPrev实为post
+			circle(imgDisplay, cornerPrevC[i], 1, Scalar(255, 0, 0), -1, 8);//因为swap函数imgPost实为Prev
+			line(imgDisplay,cornerPrevC[i],cornerPostC[i],Scalar(255, 0, 0));
+		}
+		else
+		{
+			// circle(imgDisplay, cornerPostC[i], 2, Scalar(0, 0, 255), -1, 8);//因为swap函数imgpPrev实为post
+			// circle(imgDisplay, cornerPrevC[i], 2, Scalar(0, 0, 255), -1, 8);//因为swap函数imgPost实为Prev
+			// line(imgDisplay,cornerPrevC[i],cornerPostC[i],Scalar(0, 0, 255));
+		}
+	}
+
+	resize(imgDisplay,imgDisplay,Size(100,100));
+	cv::imshow("camera",imgDisplay);
+
+	if(global_data.param[PARAM_SAVE_TEST_VIDEO])
+	{
+		printf("write video\n");
+		saveVideo(imgDisplay);//函数内Size要和视频大小相同
+	}
+#endif
 	float of_quality = (float)cornerPrevC.size() / cornerPrev.size();
 
 	if(global_data.param[PARAM_SEND_DATA])
@@ -311,10 +352,10 @@ int xtofOpticalFlow(Mat &imgPrev, Mat &imgDisplay)
 			{
 				mavlink_msg_heartbeat_send(global_data.mavlink, MAV_TYPE_HELICOPTER, MAV_AUTOPILOT_GENERIC
 					, MAV_MODE_GUIDED_ARMED, 0, MAV_STATE_ACTIVE);
-				//像素距离扩大十倍显示
 				mavlink_msg_optical_flow_send(global_data.mavlink, microsSinceEpoch(), global_data.param[PARAM_SENSOR_ID]
-					, affine2D.at<double>(0, 2), affine2D.at<double>(1, 2)
+					, affine2D.at<double>(0, 2), affine2D.at<double>(1, 2) //对应qgroundcontrol上的flow_x,flow_y,需要是整数类型
 					, g_cameraShiftX, g_cameraShiftY, of_quality, g_cameraHeight);
+					//, affine2D.at<double>(0, 2), affine2D.at<double>(1, 2), of_quality, g_cameraHeight);
 				//printf("send optical\n");
 			}
 
@@ -346,37 +387,7 @@ int xtofOpticalFlow(Mat &imgPrev, Mat &imgDisplay)
 			printf("send uart\n");
 			nrfSend(g_cameraShiftX, g_cameraShiftY);
 		}
-	}
-#ifndef DEBIAN
-	debugDrawCurve(g_cameraShiftX,g_cameraShiftY, "curve1");
-	cvtColor(imgDisplay, imgDisplay, CV_GRAY2BGR);
-	
-	for (int i = 0; i < cornerPostC.size(); i++)
-	{
-		if (1 == affineInlier.at<unsigned char>(i))
-		{
-			circle(imgDisplay, cornerPostC[i], 1, Scalar(255, 0, 0), -1, 8);//因为swap函数imgpPrev实为post
-			circle(imgDisplay, cornerPrevC[i], 1, Scalar(255, 0, 0), -1, 8);//因为swap函数imgPost实为Prev
-			line(imgDisplay,cornerPrevC[i],cornerPostC[i],Scalar(255, 0, 0));
-		}
-		else
-		{
-			circle(imgDisplay, cornerPostC[i], 2, Scalar(0, 0, 255), -1, 8);//因为swap函数imgpPrev实为post
-			circle(imgDisplay, cornerPrevC[i], 2, Scalar(0, 0, 255), -1, 8);//因为swap函数imgPost实为Prev
-			line(imgDisplay,cornerPrevC[i],cornerPostC[i],Scalar(0, 0, 255));
-		}
-	}
-
-	resize(imgDisplay,imgDisplay,Size(300,300));
-	cv::imshow("camera",imgDisplay);
-
-	if(global_data.param[PARAM_SAVE_TEST_VIDEO])
-	{
-		printf("write video\n");
-		saveVideo(imgDisplay);
-	}
-#endif
-	
+	}	
 #ifdef DEBUG
 	static int imgNum{ 0 };//图像序号
 
@@ -430,12 +441,12 @@ void globalDataInit()
 	global_data.img.width =  IMG_SELECT_AREA * IMG_SCALE;//最终图像大小
 	global_data.img.height =  IMG_SELECT_AREA * IMG_SCALE;
 
-	global_data.param[PARAM_SONAR_RAW] = FALSE;
+	global_data.param[PARAM_SONAR_RAW] = FALSE;//输出超声波距离
 	global_data.param[PARAM_FIX_POINT] = TRUE;//固定点，指不计算容易跟踪的点
 
 	global_data.param[PARAM_PREPROCESS_ISC] = FALSE;//是否用ISC预处理
 	global_data.param[PARAM_SAVE_TEST_VIDEO] = TRUE;//保存视频
-	global_data.param[PARAM_FILTER_IMG] = FALSE;//是否对原图像高斯滤波
+	global_data.param[PARAM_FILTER_IMG] = FALSE;//是否对原图像滤波
 	global_data.param[PARAM_FILTER_MEDIAM] = TRUE;//对光流输出滤波
 
 }

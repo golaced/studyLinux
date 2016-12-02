@@ -52,7 +52,7 @@ int saveVideoInit()
     double fps = 25.0;
 
 
-    g_savecap.open("/home/lxg-/video/tmp.avi", codec, fps, Size(300, 300));
+    g_savecap.open("/home/lxg-/video/tmp.avi", codec, fps, Size(100, 100));
     if(!g_savecap.isOpened())
     {
         printf("can not open save video\n");

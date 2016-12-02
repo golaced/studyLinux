@@ -8,7 +8,7 @@ class Affine2DEstimator
 public:
 	Affine2DEstimator();
 	int runKernel(const CvMat* m1, const CvMat* m2, CvMat* model);
-	bool runRANSAC(const CvMat* m1, const CvMat* m2, CvMat* model,
+	bool runRANSAC(int &inlierNum, const CvMat* m1, const CvMat* m2, CvMat* model,
 		CvMat* mask, double threshold,
 		double confidence = 0.99, int maxIters = 60);//最大迭代次数
 	bool getSubset(const CvMat* m1, const CvMat* m2,
@@ -35,7 +35,7 @@ protected:
 * Function:  
 * Date: 2016/07/08 23:11
 *****************************************************************************************/
-int xtofAffine2D(cv::InputArray _from, cv::InputArray _to,
+int xtofAffine2D(int &inlierNum, cv::InputArray _from, cv::InputArray _to,
 	cv::OutputArray _out, cv::OutputArray _inliers,
 	double param1 = 1, double param2 = 0.99);
 

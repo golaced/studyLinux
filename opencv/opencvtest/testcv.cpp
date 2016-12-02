@@ -1,14 +1,16 @@
 #include <stdio.h>
 #include <opencv2/opencv.hpp>
-
+#include <iostream>
+using namespace std;
 using namespace cv;
 int imshowTest();
 int videoTest();
-int preprocessIm(Mat &srcIm);
+int preprocessIm(Mat &srcIm, int delta);
 int readIm(Mat &im);
 int ranColor();
 int writeVideo();
 int showVideo();
+
 
 int main(int argc, char *argv[])
 {
@@ -34,9 +36,24 @@ int main(int argc, char *argv[])
 		Mat im;
 
 		readIm(im);
-		preprocessIm(im);
-		imshow("binary", im);
+		preprocessIm(im, 1);
+		imshow("binary1", im);
 
+		readIm(im);
+		preprocessIm(im, 2);
+		imshow("binary2", im);
+
+		readIm(im);
+		preprocessIm(im, 3);
+		imshow("binary3", im);
+		
+		readIm(im);
+		preprocessIm(im, 4);
+		imshow("binary4", im);
+
+		readIm(im);
+		preprocessIm(im, 5);
+		imshow("binary5", im);
 		break;
 	}
 	case 4://随机颜色
@@ -47,7 +64,7 @@ int main(int argc, char *argv[])
 	case 5://写视频
 		writeVideo();
 		break;
-	case 6:
+	case 6://显示两段视频
 		showVideo();
 		break;
 	default:
@@ -82,6 +99,7 @@ int showVideo()
 	namedWindow("tmp_b");
 	moveWindow("tmp_b", 350, 15);
 
+	char c;
 	while(1)
 	{
 		capo >> imo;
@@ -101,7 +119,11 @@ int showVideo()
 		}
 		
 		imshow("tmp_b", imb);
-		waitKey(40);
+		c = waitKey(40);
+		if(c == 's')
+		{
+			waitKey(0);
+		}
 	}
 }
 
@@ -151,7 +173,7 @@ int ranColor()
 }
 int readIm(Mat &im)
 {
-	im = imread("/home/lxg-/code/video/test.jpg");
+	im = imread("/home/lxg-/video/leina.jpg");
 	if(im.data == NULL) 
 	{
 		printf("can not open test.jpg\n");
@@ -170,7 +192,7 @@ int readIm(Mat &im)
 	printf("can imshow\n");
 }
 
-int preprocessIm(Mat &srcIm)
+int preprocessIm(Mat &srcIm, int delta)
 {
 	int cols = srcIm.cols;
 	int rows = srcIm.rows;
@@ -179,9 +201,9 @@ int preprocessIm(Mat &srcIm)
 	for(int i = 0; i < rows; i++)
 	{
 		p = srcIm.ptr<uchar>(i);
-		for(int j = 0; j < cols - 1; ++j)
+		for(int j = 0; j < cols - delta; ++j)
 		{
-			if(*p > *(p+1))
+			if(*p > *(p + delta))
 			{
 				*p |= 0xff;
 			}

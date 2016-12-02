@@ -25,7 +25,7 @@ confidence – Confidence level, between 0 and 1, for the estimated transformati
 Anything between 0.95 and 0.99 is usually good enough.
 Values too close to 1 can slow down the estimation significantly.
 Values lower than 0.8 - 0.9 can result in an incorrectly estimated transformation.*/
-int xtofAffine2D(InputArray _from, InputArray _to,
+int xtofAffine2D(int &inlierNum, InputArray _from, InputArray _to,
 	OutputArray _out, OutputArray _inliers,
 	double param1, double param2)
 {
@@ -52,7 +52,7 @@ int xtofAffine2D(InputArray _from, InputArray _to,
 	double epsilon = 0.00001;
 	param1 = param1 <= 0 ? 3 : param1;
 	param2 = (param2 < epsilon) ? 0.99 : (param2 > 1 - epsilon) ? 0.99 : param2;
-	Affine2DEstimator().runRANSAC(&m1, &m2, &F2x3, &mask, param1, param2);
+	Affine2DEstimator().runRANSAC(inlierNum, &m1, &m2, &F2x3, &mask, param1, param2);
 	return 1;
 }
 #ifdef _DEBUG_AFFINE
@@ -181,7 +181,7 @@ void Affine2DEstimator::computeReprojError(const CvMat* m1, const CvMat* m2, con
 * function：
 * Date：
 *****************************************************************************************/
-bool Affine2DEstimator::runRANSAC(const CvMat* m1, const CvMat* m2, CvMat* model,
+bool Affine2DEstimator::runRANSAC(int &inlierNum, const CvMat* m1, const CvMat* m2, CvMat* model,
 	CvMat* mask0, double reprojThreshold,
 	double confidence, int maxIters)
 {
@@ -258,7 +258,6 @@ bool Affine2DEstimator::runRANSAC(const CvMat* m1, const CvMat* m2, CvMat* model
 		}
 		result = true;
 
-		printf("mask\t");
 		//用最小二乘法重新计算放射变换矩阵
 		Mat maskTmp = cvCloneMat(mask0);
 		cv::Mat_<cv::Vec<uchar,1> >::iterator it = maskTmp.begin<cv::Vec<uchar,1> >();
@@ -295,6 +294,7 @@ bool Affine2DEstimator::runRANSAC(const CvMat* m1, const CvMat* m2, CvMat* model
 		myGetAffineTransform(myMs1, myMs2, model, maxGoodCount);//存在对矩阵求逆
 	}
 
+	inlierNum = maxGoodCount;
 	return result;
 }
 /*****************************************************************************************
