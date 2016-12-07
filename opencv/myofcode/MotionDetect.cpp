@@ -39,13 +39,14 @@ float g_cameraShiftX = 0.0f;
 float g_cameraShiftY = 0.0f;
 float cameraShiftSumX = 0.0f, cameraShiftSumY = 0.0f;
 double sumTime;
-
 struct global_struct global_data;
+vector<Point2f> cornerPost;
 
 int xtofOpticalFlow(Mat &imgPrev, Mat &imgDisplay);
 void debugDrawCurve(float x, float y, string s);
 void globalDataInit();
-int ofFilterMediam(float &x, float &y);
+int ofFilterMediam(float &x, float &y, float a);
+
 int main(int argc, char *argv[])
 {
 	globalDataInit();
@@ -210,15 +211,17 @@ int xtofOpticalFlow(Mat &imgPrev, Mat &imgDisplay)
 	static Mat imgPost; //后一帧图像，
 	static vector<Mat> imgPyrPrev;
 	static vector<Mat> imgPyrPost;
-	static vector<Point2f> cornerPostMask;
+	//static vector<Point2f> cornerPostMask;
 	vector<Point2f> cornerPrevC, cornerPostC;
 	Mat affine2D(2, 3, CV_64F);
 	Mat affineInlier;
+	float of_quality;
+
 
 	affine2D.setTo(0.f);
 	g_cameraShiftX = 0.f;
 	g_cameraShiftY = 0.f;
-
+	of_quality = 0;
 	//更新高度	
 	xtofCameraHeight(g_cameraHeight);
 
@@ -233,20 +236,15 @@ int xtofOpticalFlow(Mat &imgPrev, Mat &imgDisplay)
 		buildOpticalFlowPyramid(imgPost, imgPyrPost, Size(WIN_SIZE, WIN_SIZE), maxLevelNum, false);
 	}
 	
-	vector<Point2f> cornerPrev, cornerPost;//6*6=36个固定点
-	if(global_data.param[PARAM_FIX_POINT]) {
-		cornerPost.clear();
-		for (int i = 0; i < 6; i++)	{
-			for (int j = 0; j < 6; j++)
-				cornerPost.push_back(Point(j * 15 + 12, i * 15 + 12));
-		}
-	} 
-	else 
+	vector<Point2f> cornerPrev;//6*6=36个固定点
+	if(!global_data.param[PARAM_FIX_POINT]) 
 	{
-		xtofCornerToTrack(imgPost, cornerPost, mask, WIN_SIZE);//blockSize = 21  找角点的计算特征值模板的大小
+		cornerPost.clear();
+		xtofCornerToTrack(imgPost, cornerPost, mask, WIN_SIZE);// 找角点的计算特征值模板的大小
 	}
 	maxLevelNum = buildOpticalFlowPyramid(imgPrev, imgPyrPrev, Size(WIN_SIZE, WIN_SIZE), maxLevelNum, false);
 	//printf("levelNum:%d ", maxLevelNum);
+	int inlierNum = 0;
 
 	if (cornerPost.size() > 6)
 	{
@@ -254,7 +252,7 @@ int xtofOpticalFlow(Mat &imgPrev, Mat &imgDisplay)
 		vector<float> cornerErr; 
 		
 		//光流迭代条件设置
-		TermCriteria cornerTermcrit(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 17, 0.01);//迭代次数和迭代精度
+		TermCriteria cornerTermcrit(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 15, 0.1);//迭代次数和迭代精度
 		//g_ofpyrThreshold判断跟踪失败的阈值，大于g_ofpyrThreshold会判断为跟踪失败,与G矩阵较小的特征值进行比较
 		xtofCalcPyrlk(imgPyrPost, imgPyrPrev, cornerPost, cornerPrev, cornerStatus, cornerErr, cornerTermcrit, g_ofpyrThreshold, maxLevelNum);
 
@@ -269,19 +267,17 @@ int xtofOpticalFlow(Mat &imgPrev, Mat &imgDisplay)
 
 				cornerPrevC.push_back(cornerPrev[cornerNum]);
 				cornerPostC.push_back(cornerPost[cornerNum]);
-				cornerPostMask.push_back(cornerPrev[cornerNum]);//prev的角点在下一循环的新图像上,需要判断角点之间的距离来生成
+				//cornerPostMask.push_back(cornerPrev[cornerNum]);//prev的角点在下一循环的新图像上,需要判断角点之间的距离来生成
 			}
 		}
-				printf("xtofAffine\n");
 
 		affineInlier.create(1,cornerPrevC.size(),CV_8U);
 		affineInlier.setTo(1);
 
-		printf("cornerSize:%d\t", (int)cornerPrevC.size());
+		//printf("cornerSize:%d\t", (int)cornerPrevC.size());
 
 		if (cornerPrevC.size() > 4)
 		{
-			int inlierNum = 0;
 			/*仿射变换矩阵求取*/
 			
 			if (xtofAffine2D(inlierNum, cornerPrevC, cornerPostC, affine2D, affineInlier, g_ofAffineThreshold, g_ofAffineQuality))
@@ -302,10 +298,11 @@ int xtofOpticalFlow(Mat &imgPrev, Mat &imgDisplay)
 				//方案二
 				//利用视场角、高度信息，待写
 				//位移滤波
+				of_quality = (float)inlierNum / cornerPrev.size();
 
 				if(global_data.param[PARAM_FILTER_MEDIAM])//中值滤波
 				{
-					ofFilterMediam(g_cameraShiftX, g_cameraShiftY);
+					ofFilterMediam(g_cameraShiftX, g_cameraShiftY, 0.8);
 				}
 			}
 		}
@@ -333,17 +330,14 @@ int xtofOpticalFlow(Mat &imgPrev, Mat &imgDisplay)
 		}
 	}
 
-	resize(imgDisplay,imgDisplay,Size(100,100));
+	resize(imgDisplay,imgDisplay,Size(300,300));
 	cv::imshow("camera",imgDisplay);
 
 	if(global_data.param[PARAM_SAVE_TEST_VIDEO])
 	{
-		printf("write video\n");
-		saveVideo(imgDisplay);//函数内Size要和视频大小相同
+		 saveVideo(imgDisplay);//函数内Size要和视频大小相同
 	}
 #endif
-	float of_quality = (float)cornerPrevC.size() / cornerPrev.size();
-
 	if(global_data.param[PARAM_SEND_DATA])
 	{
 		if(global_data.param[PARAM_SEND_DATA] == SEND_DATA_MAVLINK)
@@ -354,14 +348,13 @@ int xtofOpticalFlow(Mat &imgPrev, Mat &imgDisplay)
 					, MAV_MODE_GUIDED_ARMED, 0, MAV_STATE_ACTIVE);
 				mavlink_msg_optical_flow_send(global_data.mavlink, microsSinceEpoch(), global_data.param[PARAM_SENSOR_ID]
 					, affine2D.at<double>(0, 2), affine2D.at<double>(1, 2) //对应qgroundcontrol上的flow_x,flow_y,需要是整数类型
-					, g_cameraShiftX, g_cameraShiftY, of_quality, g_cameraHeight);
+					, g_cameraShiftX * 20, g_cameraShiftY * 20, of_quality * 100, g_cameraHeight);
 					//, affine2D.at<double>(0, 2), affine2D.at<double>(1, 2), of_quality, g_cameraHeight);
 				//printf("send optical\n");
 			}
 
 			if(global_data.param[PARAM_SEND_VIDEO_MAVLINK])
 			{
-				printf("send video\n");
 				uint16_t image_size_send;
 
 				image_size_send = global_data.img.width * global_data.img.height;//100*100;//image_size;
@@ -418,7 +411,7 @@ int xtofOpticalFlow(Mat &imgPrev, Mat &imgDisplay)
 	//	cv::imwrite(str2, imgPostTmp);
 	//}
 #else
-	printf("%2.3f %2.3f\n", g_cameraShiftX, g_cameraShiftY);
+	printf("%2.3f\t%2.3f\n", g_cameraShiftX, g_cameraShiftY);
 #endif
 
 	return 1;
@@ -435,7 +428,7 @@ void globalDataInit()
 	global_data.param[PARAM_SENSOR_ID] = 200;
 
 	global_data.param[PARAM_SEND_OPTICAL_MAVLINK] = TRUE;
-	global_data.param[PARAM_SEND_VIDEO_MAVLINK] = TRUE;
+	global_data.param[PARAM_SEND_VIDEO_MAVLINK] = TRUE;//是否发送mavlink视频
 	global_data.param[PARAM_SEND_SONAR_MAVLINK] = TRUE;
 
 	global_data.img.width =  IMG_SELECT_AREA * IMG_SCALE;//最终图像大小
@@ -448,6 +441,11 @@ void globalDataInit()
 	global_data.param[PARAM_SAVE_TEST_VIDEO] = TRUE;//保存视频
 	global_data.param[PARAM_FILTER_IMG] = FALSE;//是否对原图像滤波
 	global_data.param[PARAM_FILTER_MEDIAM] = TRUE;//对光流输出滤波
+
+	if(global_data.param[PARAM_FIX_POINT])
+	{
+		setCorner(cornerPost);
+	}
 
 }
 
@@ -465,7 +463,7 @@ void debugDrawCurve(float x, float y, string s)
 	int arrayLength = DEBUGARRAYLENGTH - 1;
 	int max = 150, min = -150;
 
-	x *= 20;//放大10倍
+	x *= 20;//放大倍数
 	y *= 20;
 	if (x > max) x = max;
 	if (x < min) x = min;
@@ -493,9 +491,10 @@ void debugDrawCurve(float x, float y, string s)
 		circle(im, Point2d(i * 3, imY[i]), 2, Scalar(0, 255, 0), -1, 8);
 	}
 	imshow(s, im);
+	//saveVideo(im);//函数内Size要和视频大小相同
 }
 
-int ofFilterMediam(float &x, float &y)
+int ofFilterMediam(float &x, float &y, float a)
 {
 	//中值滤波
 	static float xx[3];
@@ -503,7 +502,6 @@ int ofFilterMediam(float &x, float &y)
 
 	xx[2] = xx[1];
 	xx[1] = xx[0];
-
 	if(xx[2] > xx[1])
 	{
 		if(x > xx[2])
@@ -518,7 +516,6 @@ int ofFilterMediam(float &x, float &y)
 	
 	yy[2] = yy[1]; 
 	yy[1] = yy[0];
-
 	if(yy[2] > yy[1])
 	{
 		if(y > yy[2])
@@ -554,16 +551,15 @@ int ofFilterMediam(float &x, float &y)
 	//低通滤波
 	static float xxx[4];
 	static float yyy[4];
-	float a = 0.2;
 	
-	x = x * (1-a) + xxx[0] * a;
+	x = x * a + xxx[0] * (1 - a);
 	// x = (xxx[3] + xxx[2] + xxx[1] + xxx[0] + x) / 5;
 	// xxx[3] = xxx[2];
 	// xxx[2] = xxx[1];
 	// xxx[1] = xxx[0];
 	xxx[0] = x;
 
-	y = y * (1-a) + yyy[0] * a;
+	y = y * a + yyy[0] * (1 - a);
 	// y = (yyy[3] + yyy[2] + yyy[1] + yyy[0] + y) / 5;
 	// yyy[3] = yyy[2];
 	// yyy[2] = yyy[1];

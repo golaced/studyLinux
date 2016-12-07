@@ -1,7 +1,7 @@
 #include "xtofFindCorner.h"
 #include "xtofglobal.h"
-
-#include <iostream>
+#include <stdio.h>
+#include <math.h>
 using namespace std;
 using namespace cv;
 #define CORNER_QUALITY			0.001	//角点置信度，与最大值的乘积作为寻找符合角点特征值大小的阈值
@@ -23,6 +23,20 @@ template<typename T> struct greaterThanPtr
 	bool operator()(const T* a, const T* b) const { return *a > *b; }
 };
 
+
+void setCorner(vector<Point2f> &src)
+{
+	int base = 12;
+	int pointNum = 10;
+	float span = (float)(global_data.img.width - base * 2) / (pointNum-1);
+
+	src.clear();
+	for (int i = 0; i < pointNum; i++)	
+	{
+		for (int j = 0; j < pointNum; j++)
+			src.push_back(Point(floor(j * span + base), floor(i * span + base)));
+	}
+}
 /****************************************************************************************
 * File: findCorner.cpp
 * Name: xtofCornerToTrack

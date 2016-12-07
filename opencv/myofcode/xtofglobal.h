@@ -88,5 +88,5 @@ struct global_struct
 	mavlink_channel_t mavlink;
 };
 
-
+extern global_struct global_data;
 #endif

@@ -4,8 +4,9 @@
 #include "opencv2/opencv.hpp"
 using namespace cv;
 
-
-//#define  DEBIAN
+#ifdef __arm__//gcc预设的宏定义
+    #define  DEBIAN
+#endif
 
 #define NRF_DEVICE "/dev/ttyUSB1"
 #define NRF_BAUDRATE 9600

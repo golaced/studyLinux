@@ -511,7 +511,9 @@ xtofFindCorner.h
 /home/lxg-/code/opencv/myofcode/xtofFindCorner.h
 xtofglobal.h
 /home/lxg-/code/opencv/myofcode/xtofglobal.h
-iostream
+stdio.h
+-
+math.h
 -
 
 /home/lxg-/code/opencv/myofcode/xtofFindCorner.h
