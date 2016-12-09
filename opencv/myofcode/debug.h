@@ -17,4 +17,9 @@ int saveVideoInit();
 int saveVideo(Mat &im);
 int closeSaveVideo();
 
+void xmlClose();
+void xmlInit(void);
+int saveXmlData(float x, float y);
+
+
 #endif

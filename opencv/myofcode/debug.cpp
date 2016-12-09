@@ -18,6 +18,7 @@ extern "C"
 
 int g_nrfFd;
 VideoWriter g_savecap;
+FileStorage g_fs;
 
 int usbNrfInit()
 {
@@ -66,4 +67,20 @@ int saveVideo(Mat &im)
 int closeSaveVideo()
 {
     g_savecap.release();
+}
+void xmlInit(void)
+{
+    g_fs.open("tmp.xml", FileStorage::WRITE);
+
+}
+int saveXmlData(float x, float y)
+{
+    g_fs << "{:";
+    g_fs << x;
+    g_fs << y;
+    g_fs << ":}";
+}
+void xmlClose()
+{
+    g_fs.release();
 }

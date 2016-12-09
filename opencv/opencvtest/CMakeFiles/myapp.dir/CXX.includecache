@@ -9,9 +9,15 @@
 /home/lxg-/code/opencv/opencvtest/testcv.cpp
 stdio.h
 -
+testcv.h
+/home/lxg-/code/opencv/opencvtest/testcv.h
 opencv2/opencv.hpp
 -
 iostream
+-
+
+/home/lxg-/code/opencv/opencvtest/testcv.h
+opencv2/opencv.hpp
 -
 
 /usr/local/include/opencv2/calib3d/calib3d.hpp

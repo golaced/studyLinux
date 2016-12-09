@@ -27,7 +27,7 @@ template<typename T> struct greaterThanPtr
 void setCorner(vector<Point2f> &src)
 {
 	int base = 12;
-	int pointNum = 10;
+	int pointNum = 7;
 	float span = (float)(global_data.img.width - base * 2) / (pointNum-1);
 
 	src.clear();

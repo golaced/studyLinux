@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include "testcv.h"
 #include <opencv2/opencv.hpp>
 #include <iostream>
 using namespace std;
@@ -10,11 +11,11 @@ int readIm(Mat &im);
 int ranColor();
 int writeVideo();
 int showVideo();
-
+void quick_sort(int s[], int l, int r);
 
 int main(int argc, char *argv[])
 {
-	int flg = 6;
+	int flg = 8;
 
 	if(argc > 1)
 	{
@@ -67,12 +68,119 @@ int main(int argc, char *argv[])
 	case 6://显示两段视频
 		showVideo();
 		break;
+	case 7:
+		{
+			myVideo firstone;
+			string name = "tmp.avi";
+
+			if(argc == 2)
+			{
+				name = argv[1];
+			}
+			firstone.openVideo(name);
+			firstone.controlVideo();
+			break;
+		}
+	case 8:
+		{
+			int data[5] = {5, 6, 3, 2, 7};
+			quick_sort(data, 0, 4);
+			for(int i = 0; i < 5 ;i++)
+				printf("%d\n", data[i]);
+			break;
+		}
 	default:
 		printf("arg is not right\n");
 		break;
 	}	
 	waitKey(0);
 	return 0;
+}
+/*
+快速排序
+l:数组最小下标,
+r：数组最大下标
+*/
+void quick_sort(int s[], int l, int r)
+{
+    if (l < r)
+    {
+		//Swap(s[l], s[(l + r) / 2]); //将中间的这个数和第一个数交换 参见注1
+        int i = l, j = r, x = s[l];
+        while (i < j)
+        {
+            while(i < j && s[j] >= x) // 从右向左找第一个小于x的数
+				j--;  
+            if(i < j) 
+				s[i++] = s[j];
+			
+            while(i < j && s[i] < x) // 从左向右找第一个大于等于x的数
+				i++;  
+            if(i < j) 
+				s[j--] = s[i];
+        }
+        s[i] = x;
+        quick_sort(s, l, i - 1); // 递归调用 
+        quick_sort(s, i + 1, r);
+    }
+}
+
+void myVideo::openVideo(string name)
+{
+    string path("/home/lxg-/video/");
+    
+    videoName = name;
+    cap.open(path + name);
+    if(!cap.isOpened())
+    {
+        printf("cano not open video\n");
+        exit(0);
+    }
+}
+
+void myVideo::controlVideo()
+{
+	char key = 0;
+	int count = 0;
+	int flg = 9000;
+
+	while(1)
+	{
+		if(flg > 0)
+		{
+			cap >> im;
+			if(im.empty())
+			{
+				exit(0);
+			}
+			printf("count:%d\n", count);
+			count ++;
+			imshow(videoName, im);
+			flg --;
+		}
+		key = waitKey(33);
+		switch(key)
+		{
+		case 's':
+			flg = 0;
+			break;
+		case 'a':
+			count -= 2;
+			cap.set(CV_CAP_PROP_POS_FRAMES, count);
+			flg = 1;
+			break;
+		case 'd':
+			flg = 1;
+			break;
+		case 'w':
+			flg = 9000;
+			break;
+		case 0x1b:
+			exit(0);
+		default :
+			break;
+		}
+	}
 }
 int showVideo()
 {

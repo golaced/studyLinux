@@ -3,6 +3,7 @@
 
 CMakeFiles/myapp.dir/testcv.cpp.o
  /home/lxg-/code/opencv/opencvtest/testcv.cpp
+ /home/lxg-/code/opencv/opencvtest/testcv.h
  /usr/local/include/opencv2/calib3d/calib3d.hpp
  /usr/local/include/opencv2/contrib/contrib.hpp
  /usr/local/include/opencv2/contrib/openfabmap.hpp

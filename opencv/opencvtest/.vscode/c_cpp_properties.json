@@ -11,7 +11,7 @@
         {
             "name": "Linux",
             "includePath": ["/usr/include",
-                            "/usr/share/include"],
+                            "/usr/local/include"],
             "browse" : {
                 "limitSymbolsToIncludedHeaders" : true,
                 "databaseFilename" : ""

@@ -46,6 +46,7 @@ int xtofOpticalFlow(Mat &imgPrev, Mat &imgDisplay);
 void debugDrawCurve(float x, float y, string s);
 void globalDataInit();
 int ofFilterMediam(float &x, float &y, float a);
+void quick_sort(float s[], int l, int r);
 
 int main(int argc, char *argv[])
 {
@@ -274,9 +275,9 @@ int xtofOpticalFlow(Mat &imgPrev, Mat &imgDisplay)
 		affineInlier.create(1,cornerPrevC.size(),CV_8U);
 		affineInlier.setTo(1);
 
-		//printf("cornerSize:%d\t", (int)cornerPrevC.size());
+		printf("cornerSize:%d\t", (int)cornerPrevC.size());
 
-		if (cornerPrevC.size() > 4)
+		if (cornerPrevC.size() > 10)
 		{
 			/*仿射变换矩阵求取*/
 			
@@ -347,8 +348,10 @@ int xtofOpticalFlow(Mat &imgPrev, Mat &imgDisplay)
 				mavlink_msg_heartbeat_send(global_data.mavlink, MAV_TYPE_HELICOPTER, MAV_AUTOPILOT_GENERIC
 					, MAV_MODE_GUIDED_ARMED, 0, MAV_STATE_ACTIVE);
 				mavlink_msg_optical_flow_send(global_data.mavlink, microsSinceEpoch(), global_data.param[PARAM_SENSOR_ID]
-					, affine2D.at<double>(0, 2), affine2D.at<double>(1, 2) //对应qgroundcontrol上的flow_x,flow_y,需要是整数类型
-					, g_cameraShiftX * 20, g_cameraShiftY * 20, of_quality * 100, g_cameraHeight);
+					, 0 - affine2D.at<double>(0, 2) / CAMERA_FOCAL_X * g_cameraHeight / IMG_SCALE * 20
+					, affine2D.at<double>(1, 2) //对应qgroundcontrol上的flow_x,flow_y,需要是整数类型
+					, g_cameraShiftX * 20 //对应flow_comp_m_x
+					, g_cameraShiftY * 20, of_quality * 100, g_cameraHeight);
 					//, affine2D.at<double>(0, 2), affine2D.at<double>(1, 2), of_quality, g_cameraHeight);
 				//printf("send optical\n");
 			}
@@ -497,73 +500,128 @@ void debugDrawCurve(float x, float y, string s)
 int ofFilterMediam(float &x, float &y, float a)
 {
 	//中值滤波
-	static float xx[3];
-	static float yy[3];
+	static float xx[7];
+	static float yy[7];
+	float xtmp[7];
+	float ytmp[7];
 
-	xx[2] = xx[1];
-	xx[1] = xx[0];
-	if(xx[2] > xx[1])
+	for(int i = 5; i > -1; i--)
 	{
-		if(x > xx[2])
-		{
-			x = xx[2];
-		}
-		else if(x < xx[1])
-		{
-			x = xx[1];
-		}
+		xx[i + 1] = xx[i];
+		xtmp[i + 1] = xx[i + 1];
+	//	printf(" %f ", xx[i]);
 	}
+	xx[0] = x;
+	xtmp[0] = xx[0];	
+	quick_sort(xtmp, 0, 5);
+	x = xtmp[3];
+	// for(int i = 0; i < 6; i++)
+	// {
+	// 	printf("%f\t", xtmp[i]);
+	// }
+
+	// yy[2] = yy[1]; 
+	// yy[1] = yy[0];
+	// if(yy[2] > yy[1])
+	// {
+	// 	if(y > yy[2])
+	// 	{
+	// 		y = yy[2];
+	// 	}
+	// 	else if(y < yy[1])
+	// 	{
+	// 		y = yy[1];
+	// 	}
+	// }
 	
-	yy[2] = yy[1]; 
-	yy[1] = yy[0];
-	if(yy[2] > yy[1])
-	{
-		if(y > yy[2])
-		{
-			y = yy[2];
-		}
-		else if(y < yy[1])
-		{
-			y = yy[1];
-		}
-	}
+	// //限幅滤波
+	// int max = 20;//单位cm
+	// int min = 0 - max;
+	// if(x > max)
+	// { 
+	// 	x = max;
+	// }
+	// else if(x < min)
+	// {
+	// 	x = min;
+	// }
+	// if(y > max)
+	// {
+	// 	y = max;
+	// }
+	// else if(y < min)
+	// {
+	// 	y = min;
+	// }
+
+	// //低通滤波
+	// static float xxx[4];
+	// static float yyy[4];
 	
-	//限幅滤波
-	int max = 20;//单位cm
-	int min = 0 - max;
-	if(x > max)
-	{ 
-		x = max;
-	}
-	else if(x < min)
-	{
-		x = min;
-	}
-	if(y > max)
-	{
-		y = max;
-	}
-	else if(y < min)
-	{
-		y = min;
-	}
+	// x = x * a + xxx[0] * (1 - a);
+	// // x = (xxx[3] + xxx[2] + xxx[1] + xxx[0] + x) / 5;
+	// // xxx[3] = xxx[2];
+	// // xxx[2] = xxx[1];
+	// // xxx[1] = xxx[0];
+	// xxx[0] = x;
 
-	//低通滤波
-	static float xxx[4];
-	static float yyy[4];
-	
-	x = x * a + xxx[0] * (1 - a);
-	// x = (xxx[3] + xxx[2] + xxx[1] + xxx[0] + x) / 5;
-	// xxx[3] = xxx[2];
-	// xxx[2] = xxx[1];
-	// xxx[1] = xxx[0];
-	xxx[0] = x;
+	// y = y * a + yyy[0] * (1 - a);
+	// // y = (yyy[3] + yyy[2] + yyy[1] + yyy[0] + y) / 5;
+	// // yyy[3] = yyy[2];
+	// // yyy[2] = yyy[1];
+	// // yyy[1] = yyy[0];
+	// yyy[0] = y;
 
-	y = y * a + yyy[0] * (1 - a);
-	// y = (yyy[3] + yyy[2] + yyy[1] + yyy[0] + y) / 5;
-	// yyy[3] = yyy[2];
-	// yyy[2] = yyy[1];
-	// yyy[1] = yyy[0];
-	yyy[0] = y;
+	//消抖滤波法,其实就是对信号进行了降采样
+	// static int count;
+	// static float xlast, ylast;
+	// //if(((x - xlast) < 0.1)&&((x - xlast) > -0.1))
+	// if(x == xlast)
+	// {
+	// 	count = 0;
+	// }
+	// else 
+	// {
+	// 	count ++;
+	// }
+	// if(count < 3)
+	// {
+	// 	x = xlast;
+	// }
+	// else
+	// {
+	// 	xlast = x;
+	// 	count = 0;
+	// }
 
+}
+
+/*
+快速排序
+l:数组最小下标,
+r：数组最大下标
+*/
+void quick_sort(float s[], int l, int r)
+{
+    if (l < r)
+    {
+		//Swap(s[l], s[(l + r) / 2]); //将中间的这个数和第一个数交换 参见注1
+        int i = l, j = r;
+		float x = s[l];
+        while (i < j)
+        {
+            while(i < j && s[j] >= x) // 从右向左找第一个小于x的数
+				j--;  
+            if(i < j) 
+				s[i++] = s[j];
+			
+            while(i < j && s[i] < x) // 从左向右找第一个大于等于x的数
+				i++;  
+            if(i < j) 
+				s[j--] = s[i];
+        }
+        s[i] = x;
+        quick_sort(s, l, i - 1); // 递归调用 
+        quick_sort(s, i + 1, r);
+    }
 }
